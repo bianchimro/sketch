@@ -78,6 +78,20 @@ class MongoWrapper(object):
         collection = self.getCollection(db_name, collection_name)
         return collection.find_one(queryDict)
         
+    
+    def objects_from_ids(self, db_name, collection_name, ids_list):
+        
+        collection = self.getCollection(db_name, collection_name)
+        object_ids = [bson.objectid.ObjectId(x) for x in ids_list]
+        query = { "_id" : {"$in" : object_ids }}
+        return collection.find(query)
+    
+    
+    def objects_from_query(self, db_name, collection_name, query={}):
+        
+        collection = self.getCollection(db_name, collection_name)
+        return collection.find(query)
+    
         
     
     def objects(self, db_name, collection_name, query_dict={}, offset=0, limit=100, formatter_callback=None):
