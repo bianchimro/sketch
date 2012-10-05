@@ -1,5 +1,5 @@
 Django==1.4
-django-bootstrapped==0.1.0-dev
+-e git://github.com/bianchimro/django-bootstrapped.git@11da28f515adbad60a64d51d444eaf8df4dee186#egg=django_bootstrapped-dev
 django-json-field==0.3
 geopy==0.94.2
 pymongo==2.2
