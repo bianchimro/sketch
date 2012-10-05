@@ -195,7 +195,9 @@ def formatters(request):
 
 def query(request, collection, command, database=None):
     """
-    Main view to send commands to handler
+    View to send commands to handler.
+    Deprecated.
+    
     """
     out = createBaseResponseObject()
 
@@ -243,7 +245,7 @@ def query(request, collection, command, database=None):
 
 def objects(request, collection, database=None):
     """
-    Main view to send commands to handler
+    Query view, gets some objects
     """
     out = createBaseResponseObject()
 
@@ -304,6 +306,10 @@ def objects(request, collection, database=None):
 @decorators.login_required
 @decorators.can_write_collection
 def object(request, collection, oid, database=None):
+    """
+    Single object view
+    """
+    
     database = database or settings.MONGO_SERVER_DEFAULT_DB
     
     out = createBaseResponseObject()
@@ -431,7 +437,6 @@ def importCall(request, collection, database=None):
 
 
 
-
 #processing view
 #TODO: handle read permission
 def processObjects(request, collection, database=None):
@@ -446,6 +451,32 @@ def processObjects(request, collection, database=None):
     #TODO: consider writing output to a collection
     #TODO: leverage map/reduce when possible
     
-    
+
+    if 'ids' in request.GET:
+        ids = request.GET['ids']
+        #TODO: get records by id
+        records = []
+        
+    if 'query' in request.GET:
+        query = request.GET['query']
+        #todo: get records by query
+        records = []
+            
+    #processing cycle
+    for record in records:
+        pass
+
     out = createBaseResponseObject()
+    
+    database = database or settings.MONGO_SERVER_DEFAULT_DB
+    mongo = MongoWrapper()
+    mongo.connect()
+    
+    try:
+        mongo.connection.close()
+    except:
+        pass
+    
+    
     return HttpResponse(json.dumps(out, default=bson.json_util.default))
+    
