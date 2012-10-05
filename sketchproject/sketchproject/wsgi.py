@@ -1,3 +1,5 @@
+#!/var/www/sketch.densitydesign.org/sketch/env/bin/python
+
 """
 WSGI config for sketchproject project.
 
@@ -13,7 +15,18 @@ middleware here, or combine a Django application with an application of another
 framework.
 
 """
-import os
+import os, sys, site
+
+root_dir = "/var/www/sketch.densitydesign.org/sketch/env"
+packages_dir = os.path.join(root_dir, "lib/python2.6/site-packages")
+
+site.addsitedir(packages_dir)
+
+sys.path.append(root_dir)
+sys.path.insert(0,packages_dir)
+
+sys.path.append("/var/www/sketch.densitydesign.org/sketch/sketchproject")
+
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sketchproject.settings")
 
