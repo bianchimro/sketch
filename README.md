@@ -120,13 +120,17 @@ The record parser is the object used to convert data from a textual source into 
 It is used at import time.
 
 
-### Formatters
-
-TBW
-
 ### Mappers and Transforms
 
 TBW
+
+### Formatters
+Formatters are functions used to format records before returning them from a query.
+
+Formatters can augment the property of a record by defining new keys, but also return a totally
+new object (a dictionary).
+
+
 
 ### Processors
 
