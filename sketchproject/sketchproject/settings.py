@@ -178,3 +178,9 @@ LOGGING = {
         },
     }
 }
+
+try:
+    import local_settings
+    MONGO_SERVER_PORT = local_settings.MONGO_SERVER_PORT
+except:
+    pass

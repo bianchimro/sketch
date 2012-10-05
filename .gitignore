@@ -1,4 +1,5 @@
 *.pyc
 env/*
 *.sqlite
+sketchproject/sketchproject/local_settings.py
 sketchproject/sketchdata/*
