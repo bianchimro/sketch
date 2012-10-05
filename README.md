@@ -125,6 +125,7 @@ It is used at import time.
 TBW
 
 ### Formatters
+
 Formatters are functions used to format records before returning them from a query.
 
 Formatters can augment the property of a record by defining new keys, but also return a totally
