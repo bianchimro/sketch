@@ -21,7 +21,9 @@ The mapping is represented as a dictionary, where:
         the given record property is passed to the transform. The special name '__self__' refers
         to the whole record.
     
-      * another transformation descriptor.
+      * another transformation descriptor. The return value will be passed as arguments.
+        Descriptors can be nested again.
+        
 
 """
 
@@ -48,9 +50,22 @@ class RecordMapper(object):
         
     def mapField(self, record, mappingItem):
         """
+        Calculates and returns the mapped value for a given mapping item.
+        
+        The mapping item can be either a transformation descriptor or a string.
+
+        If the mapping item is a string a lookup on the record is performed.
+        The special string "__self__" return the record itself.
+
+        If the mapping type is a transformation descriptor, the transformation is evaluated,
+        calling recursively this method if some arguments are described as other transformation
+        descriptors.
+        
         """
+        
         mappingItemType = type(mappingItem)
 
+        
         if mappingItemType is str:
             if mappingItem == "__self__":
                 return record
@@ -71,7 +86,7 @@ class RecordMapper(object):
             transformFunction = self.transformFunctions[transform]
             return transformFunction(*recordArgs)
         
-        #raising an exception
+        #raising an exception: the mapping item has a wrong type
         raise TypeError
         
 
@@ -100,12 +115,23 @@ class RecordMapper(object):
         newRecord.update(constants)
         return newRecord
         
+        
     def validateMapping(self, mapping):
         """
+        This helper function validates a mapping.
+        The structure of transformation description is checked, and in case of
+        transform functions also the number of arguments passed in is checked,
+        comparing it to the number of arguments declared in function signature.
+        
+        This function returns true or raises an exception.
+        NOTE: At the moment this function is not reliable, as it does not perform
+        recursive validation.
         """
         
         #element validation logic
+        #TODO: move to class method!
         #TODO: use recursively if other transforms are found in args or kwargs
+        
         def validateMappingElement(el):
             if type(el) is str:
                 return true
@@ -171,7 +197,5 @@ if __name__ == '__main__':
     record = { 'id' : 100, 'name' : 'Mauro', 'surname': 'Bianchi'}
 
     newRecord = mapper.mapRecord(record, mapping)
-    
-    
     
     print newRecord
