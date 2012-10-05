@@ -1,6 +1,6 @@
 $(document).ready(function(){
 
-    var sketch = new sketchjs.Sketch("http://localhost:8000", 'sketchdb');  
+    var sketch = new sketchjs.Sketch("", 'sketchdb');  
     
     //Helper function to log errors and results to our console div
     
