@@ -1,9 +1,40 @@
 {% extends "sketch_ui/base.html" %}
 
-{% block content %}
+    {% block nav %}
+    <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">Sketch Browser</a>
+          <div class="nav-collapse">
+              {% if user.is_authenticated %}
+              <ul class="nav pull-left">
+                <li data-bind="css: { active: currentPanel()=='serverPanel' }"><a data-bind="click: toServerPanel " href="#serverpanel">Server info</a></li>
+                <li data-bind="css: { active: currentPanel()=='queryPanel' }"><a data-bind="click: toQueryPanel" href="#querypanel">Query</a></li>
+                <li data-bind="css: { active: currentPanel()=='importPanel' }"><a data-bind="click: toImportPanel" href="#querypanel">Import</a></li>
+              </ul>
+              
+              <ul class="nav pull-right">
+                  <li><p class="navbar-text">Welcome {{ user }} &nbsp;</p></li>
+                <li>
+                  <form class="navbar-form" method="get" action="/logout/">
+                      <input class="btn" type="submit" name="logout-button" value="Log me out"/>
+                  </form>
+                </li>
+              </ul>
+              {% endif %}
+          </div><!--/.nav-collapse -->          
+        </div>
+      </div>
+    </div>
+    {% endblock %}
 
-    
-    
+    {% block content %}
+
     <div data-bind="if: currentPanel()=='serverPanel'" id="serverpanel">
         <h1>Server info</h1>
         <!--
@@ -160,22 +191,15 @@
     <div id="console-div"></div>
 
 
-{% endblock %}
+    {% endblock %}
 
-<!-- this block contains javascript inside html body -->
-{% block js_body %}
-
-    <script src="/static/sketch/js/sketch.js"></script>
-    <script src="/static/sketch_ui/js/lib/jquery.tmpl.min.js"></script>
-    <script src="/static/sketch_ui/js/lib/knockout-2.1.0.js"></script>
-    <script src="/static/sketch_ui/js/browser.js"></script>
-
-<script>
-
+    <!-- this block contains javascript inside html body -->
+    {% block js_body %}
     
-
-</script>
-
-
-
-{% endblock %}
+        <script src="/static/sketch/js/sketch.js"></script>
+        <script src="/static/sketch_ui/js/lib/jquery.tmpl.min.js"></script>
+        <script src="/static/sketch_ui/js/lib/knockout-2.1.0.js"></script>
+        <script src="/static/sketch_ui/js/browser.js"></script>
+     
+    
+    {% endblock %}

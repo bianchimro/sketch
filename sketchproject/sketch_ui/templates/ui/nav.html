@@ -1,0 +1,33 @@
+
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+    <div class="container">
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+      <a class="brand" href="#">Sketch User Interface</a>
+      <div class="nav-collapse">
+          {% if user.is_authenticated %}
+          <ul class="nav pull-left">
+            <!--
+            <li data-bind="css: { active: currentPanel()=='serverPanel' }"><a data-bind="click: toServerPanel " href="#serverpanel">Server info</a></li>
+            <li data-bind="css: { active: currentPanel()=='queryPanel' }"><a data-bind="click: toQueryPanel" href="#querypanel">Query</a></li>
+            <li data-bind="css: { active: currentPanel()=='importPanel' }"><a data-bind="click: toImportPanel" href="#querypanel">Import</a></li>
+            -->
+          </ul>
+          
+          <ul class="nav pull-right">
+              <li><p class="navbar-text">Welcome {{ user }} &nbsp;</p></li>
+            <li>
+              <form class="navbar-form" method="get" action="/logout/">
+                  <input class="btn" type="submit" name="logout-button" value="Log me out"/>
+              </form>
+            </li>
+          </ul>
+          {% endif %}
+      </div><!--/.nav-collapse -->          
+    </div>
+  </div>
+</div>

@@ -13,9 +13,9 @@ def index(request):
     return render_to_response("sketch_ui/index.html", {}, context_instance = c)
 
 @login_required(login_url="/login/")
-def waw(request):
+def ui(request):
     c = RequestContext(request)
-    return render_to_response("waw/index.html", {}, context_instance = c)
+    return render_to_response("ui/index.html", {}, context_instance = c)
 
 @login_required(login_url="/login/")
 def logout_view(request):
