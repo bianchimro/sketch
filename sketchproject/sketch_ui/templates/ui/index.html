@@ -1,0 +1,101 @@
+{% extends "sketch_ui/base.html" %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="/static/ui/css/style.css"/>
+{% endblock %}
+
+{% block nav %}
+
+    {% include "ui/nav.html" %}
+    
+{% endblock %}
+
+{% block content %}
+   
+    <div>
+        <table class="table">
+            <tr>
+                <td>File name:</td>
+                <td data-bind="text: fileName"></td>
+            </tr>
+            <tr>
+                <td>Description</td>
+                <td data-bind="text: description"></td>
+            </tr>
+
+        </table>
+    </div>
+
+    
+    <!-- to be moved to a modal dialog -->
+    <div class="modal fade out" id="save-dialog">
+        <div class="modal-header">
+            <h3>Save this project</h3>
+        </div>
+        <div class="modal-body">        
+            <form>
+                <label>Filename</label>
+                <input type="text" data-bind="value: fileNameProxy"/>
+                <label>Description</label>
+                <textarea data-bind="value: description"></textarea>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-bind="click: saveState">Save</button>
+            <button class="btn" data-bind="click: hideSaveDialog">Cancel</button>
+        </div>
+    </div>
+    
+    
+    <!-- to be moved to a modal dialog -->
+    <div class="modal fade out" id="load-dialog">
+        <div class="modal-header">
+            <h3>Load a project</h3>
+        </div>
+        <div class="modal-body">        
+            <form>
+                <label>Filename</label>
+                <input type="text" data-bind="value: fileNameProxy" disabled="disabled"/>
+                <!--<select data-bind="value: fileName, options: availableFiles"></select>-->
+                <div data-bind="foreach: availableFiles">
+                    <div class="rowdiv" data-bind="click: $root.setFilenameProxy">
+                        <div style="width:50%" class="pull-left" data-bind="text: state_name">
+                        </div >
+                        <div style="width:50%" class="pull-left" data-bind="text: description">
+                        </div >
+                        <div style="" class="clearfix">
+                        </div >
+                    </div>
+                
+                </div>
+                
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-bind="click: loadState">Load</button>
+            <button class="btn" data-bind="click: hideLoadDialog">Cancel</button>
+        </div>
+    </div>
+    
+    
+    
+{% endblock %}
+
+
+
+{% block js_body %}
+    
+     <script src="/static/sketch/js/sketch.js"></script>
+     <script src="/static/sketch_ui/js/lib/jquery.tmpl.min.js"></script>
+     <script src="/static/sketch_ui/js/lib/knockout-2.1.0.js"></script>
+     <script src="/static/ui/js/ui.js"></script>
+     <script>
+     
+        $(document).ready(function(){
+            sketchui.app = new sketchui.SketchApp();
+            ko.applyBindings(sketchui.app);
+        });
+     </script>
+     
+    
+{% endblock %}
