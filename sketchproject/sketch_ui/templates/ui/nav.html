@@ -7,7 +7,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </a>
-      <a class="brand" href="#">Sketch User Interface</a>
+      <a class="brand" href="#">Urbansketching</a>
       <div class="nav-collapse">
           {% if user.is_authenticated %}
           <ul class="nav pull-left">
@@ -17,10 +17,12 @@
               <b class="caret"></b>
             </a>
             <ul class="dropdown-menu">
-              <li><a data-bind="click: loadDialog">Load...</a></li>
+              <li><a data-bind="click: newState">New session</a></li>
               <li class="divider"></li>
-              <li><a data-bind="click: saveCurrent">Save</a></li>
-              <li><a data-bind="click: saveDialog">Save as...</a></li>
+              <li><a data-bind="click: loadDialog">Load session...</a></li>
+              <li class="divider"></li>
+              <li><a data-bind="click: saveCurrent, css: { muted: fileName() == ''}">Save session</a></li>
+              <li><a data-bind="click: saveDialog">Save session as...</a></li>
             </ul>
           </li>
            
