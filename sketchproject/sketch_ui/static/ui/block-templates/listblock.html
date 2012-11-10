@@ -1,0 +1,19 @@
+ <div class="modal modal-small ui-widget-content">
+     <div class="modal-header" data-bind="css: {run : !dirty(), notrun: dirty() }" >
+         <h3 data-bind="text: name"></h3>
+     </div>
+     <div class="modal-body">        
+
+             <div data-bind="foreach: inputObservables['results']">
+         
+                 <div data-bind="text: $root.fromjson($data)">
+                 </div>
+                 
+             </div>
+         
+     </div>
+     <div class="modal-footer">
+        
+     </div>
+
+ </div>

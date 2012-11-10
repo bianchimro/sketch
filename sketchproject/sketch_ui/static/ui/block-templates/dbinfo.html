@@ -1,0 +1,19 @@
+ <div class="modal modal-small ui-widget-content">
+     <div class="modal-header" data-bind="css: {run : !dirty(), notrun: dirty() }" >
+         <h3 data-bind="text: name"></h3>
+     </div>
+     <div class="modal-body">        
+
+             <div data-bind="foreach: results()">
+         
+                 <div data-bind="text: $data">
+                 </div>
+                 
+             </div>
+         
+     </div>
+     <div class="modal-footer">
+         <button class="btn" data-bind="click: run">Run</button>
+     </div>
+
+ </div>

@@ -1,0 +1,35 @@
+ <div class="modal modal-small ui-widget-content">
+     <div class="modal-header" data-bind="css: {run : !dirty(), notrun: dirty() }">
+         <h3 data-bind="text: name"></h3>
+     </div>
+     <div class="modal-body">        
+         <form>
+             <div data-bind="foreach: inputs">
+         
+                 <div>
+                     <label data-bind="text: name" ></label>
+                     <!-- ko if: type=='text' -->
+                         <input type="text" data-bind="value: $root.inputObservables[name]"/>
+                     <!-- /ko -->
+                     <!-- ko if: type=='textarea' -->
+                         <textarea data-bind="value: $root.inputObservables[name]"></textarea>
+                     <!-- /ko -->
+                 </div>
+                 
+             </div>
+         </form>
+         
+         <!--
+         <button type="button" class="btn btn-danger" data-toggle="collapse" data-target="#demo">
+              simple collapsible
+        </button>
+ 
+        <div class="demo" class="collapse in"> … </div>
+        -->
+         
+     </div>
+     <div class="modal-footer">
+         <button class="btn" data-bind="">Ok</button>
+         <button class="btn" data-bind="click: run">Run</button>
+     </div>
+ </div>
