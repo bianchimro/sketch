@@ -1,0 +1,40 @@
+{% load bootstrap %}
+
+<!doctype html>
+<html>
+    <head>
+        {% bootstrap_css %}
+        <link rel="stylesheet" href="/static/sketch_ui/css/styles.css">
+        
+         <style>
+          body {
+            padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+          }
+        </style>
+        <title>{% block title %}{% endblock %}</title>
+        <script src="/static/sketch/js/jquery.js"></script>
+        {% block extra_head %}{% endblock %}
+        
+    </head>
+    <body>
+        
+        
+    {% block nav %}{% endblock %}
+    <div id="wrap">
+        <div id="main-content" class="container clear-top">
+
+          {% block content_centered %}{% endblock %}
+
+        </div> <!-- /container -->
+    </div>
+
+    <div id="footer" class="footer">
+        {% block content_wide %}{% endblock %}
+    </div>
+   
+    {% bootstrap_js all %}
+    
+    {% block js_body %}{% endblock %}
+        
+    </body>
+</html>
