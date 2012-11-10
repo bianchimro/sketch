@@ -6,6 +6,8 @@ sketchui.SketchApp = function(){
 
     var self = this;
 
+    /* Properties */
+
     //the serialization name
     self.fileName = ko.observable('');
     self.fileNameProxy = ko.observable('');
@@ -15,6 +17,24 @@ sketchui.SketchApp = function(){
     
     //this flag will be used to keep track of a dirty (not saved) state
     self.isDirty = false;
+    
+    
+    //map
+    self.map = new sketchui.Map();
+    
+    //timeline
+    self.timeline = new sketchui.Timeline();    
+    
+    //objectlist
+    self.objectlist = ko.observableArray();
+    
+    //sketch queries
+    self.dataLayers = ko.observableArray();
+    
+    
+    
+    
+    /* Methods */
     
     
     //state getter and setter

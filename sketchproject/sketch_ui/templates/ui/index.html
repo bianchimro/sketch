@@ -1,4 +1,4 @@
-{% extends "sketch_ui/base.html" %}
+{% extends "ui/base.html" %}
 
 {% block extra_head %}
     <link rel="stylesheet" href="/static/ui/css/style.css"/>
@@ -10,9 +10,9 @@
     
 {% endblock %}
 
-{% block content %}
+{% block content_centered %}
    
-    <div>
+    <div id="appstate-descriptor">
         <table class="table">
             <tr>
                 <td>File name:</td>
@@ -77,10 +77,25 @@
         </div>
     </div>
     
+
+
+    <div id="map-container" data-bind="with: map">
+    </div>
+    
+    <div id="list-container" data-bind="with: objectlist">
+    </div>
+
     
     
 {% endblock %}
 
+{% block content_wide %}
+
+        <div id="timeline-container" data-bind="with: timeline">
+        </div>
+
+
+{% endblock %}
 
 
 {% block js_body %}

@@ -1,5 +1,8 @@
 var sketchui = sketchui || {};
 
+/*
+    Timeline component
+*/
 
 sketchui.Timeline = function(){
 
@@ -9,4 +12,4 @@ sketchui.Timeline = function(){
     self.bounds = ko.observable();
 
 
-}
+};

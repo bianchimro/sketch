@@ -1,5 +1,8 @@
 var sketchui = sketchui || {};
 
+/*
+    Map component
+*/
 
 sketchui.Map = function(){
 
@@ -9,6 +12,9 @@ sketchui.Map = function(){
     self.overlayLayers = ko.observableArray();
     
     self.bounds = ko.observable();
+    
+    //the underlying leaflet/openlayers map
+    self.mapObject = null;
 
 
-}
+};

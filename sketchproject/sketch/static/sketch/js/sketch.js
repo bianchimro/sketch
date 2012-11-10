@@ -1,6 +1,30 @@
 var sketchjs = sketchjs || {};
 
 
+//object id generator
+sketchjs.generateOid = function(prefix){
+
+    var out;
+    
+    function S4() {
+      return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    }
+    
+    out = '';
+    if(prefix){
+        out = prefix;
+    }
+    var d = new Date();
+    out += d.getTime();
+    out += S4()+S4()+S4()+S4()+S4()+S4()+S4()+S4();
+    
+    return out;
+
+}
+
+
+
+
 //TODO: use a more robust pattern for object creation
 sketchjs.Sketch = function(url, database){
     var self = this;

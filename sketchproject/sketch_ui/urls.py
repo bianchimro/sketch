@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, include, url
+from django.views.generic.simple import direct_to_template
 
 urlpatterns = patterns('sketch_ui.views',
 
@@ -9,5 +10,8 @@ urlpatterns = patterns('sketch_ui.views',
     url(r'ui/$', 'ui', name="ui"),
     url(r'ui/state/$', 'ui_state', name="ui_state"),
     url(r'ui/states/$', 'ui_states', name="ui_states"),
+    
+    url(r'ui/testblock/$', direct_to_template, {'template': 'ui/testblock.html'}),
+    
     
 )
