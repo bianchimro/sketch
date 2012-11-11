@@ -152,10 +152,6 @@ class MongoWrapper(object):
 
         return [collection.count()]
         
-    
-        
-        
-        
     def parseJsonDict(self, jsonString):
         #TODO: handle a list of dicts        
         try:
@@ -163,3 +159,8 @@ class MongoWrapper(object):
             return dict(obj)
         except:
             return {}
+            
+
+#conn pooling
+mongo = MongoWrapper()
+mongo.connect()

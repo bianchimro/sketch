@@ -12,7 +12,7 @@ import bson
 import bson.json_util
 
 import decorators
-from mongowrapper import MongoWrapper
+from mongowrapper import mongo
 from helpers import createBaseResponseObject, createResponseObjectWithError
 from helpers import getQueryDict, getOffset, getLimit, getFormatter, getMapper, instanceDict
 import recordparser
@@ -76,11 +76,10 @@ def server(request):
 #gets info about a database
 def getDbInfo(database):
     
-    mongo = MongoWrapper()
+    
     try:
         out = createBaseResponseObject()
-        mongo.connect()
-
+    
         existing_dbs = mongo.connection.database_names()
         if database not in existing_dbs:
             raise Exception("Database %s does not exist" % database) 
@@ -95,10 +94,6 @@ def getDbInfo(database):
         out['errors'] = str(e)
         out['status'] = 0
     
-    try:
-        mongo.connection.close()
-    except:
-        pass
     
     return out
 
@@ -203,16 +198,12 @@ def query(request, collection, command, database=None):
 
     database = database or settings.MONGO_SERVER_DEFAULT_DB
     
-    mongo = MongoWrapper()
-    
     commandMethod = getattr(mongo, command, None)
     
     try:
         
         if not commandMethod or command not in mongo.available_commands:
             raise Exception("Command %s not supported. Available commands are: %s" % (command, ", ".join(mongo.available_commands)))
-        
-        mongo.connect()
     
         existing_dbs = mongo.connection.database_names()
         if database not in existing_dbs:
@@ -231,10 +222,6 @@ def query(request, collection, command, database=None):
         out['errors'] = str(e)
         out['status'] = 0
     
-    try:
-        mongo.connection.close()
-    except:
-        pass
         
     return HttpResponse(json.dumps(out, default=bson.json_util.default))
 
@@ -251,12 +238,8 @@ def objects(request, collection, database=None):
 
     database = database or settings.MONGO_SERVER_DEFAULT_DB
     
-    mongo = MongoWrapper()
-    
     try:
         
-        mongo.connect()
-    
         existing_dbs = mongo.connection.database_names()
         if database not in existing_dbs:
             raise Exception("Database %s does not exist" % database)
@@ -293,11 +276,7 @@ def objects(request, collection, database=None):
         out['errors'] = str(e)
         out['status'] = 0
     
-    try:
-        mongo.connection.close()
-    except:
-        pass
-        
+  
     return HttpResponse(json.dumps(out, default=bson.json_util.default))
 
 
@@ -314,19 +293,10 @@ def object(request, collection, oid, database=None):
     
     out = createBaseResponseObject()
 
-    mongo = MongoWrapper()
-    mongo.connect()
-    
     if request.DELETE:
         mongo.dropObjectByOid(database, collection, oid)
         out['results'].append(oid)
- 
-    try:
-        mongo.connection.close()
-    except:
-        pass
-        
-        
+      
     return HttpResponse(json.dumps(out, default=bson.json_util.default))
 
 
@@ -350,8 +320,6 @@ def importCall(request, collection, database=None):
     out['ok_records_number'] = 0
     
     database = database or settings.MONGO_SERVER_DEFAULT_DB
-    mongo = MongoWrapper()
-    mongo.connect()
     
     if request.POST:
         
@@ -426,11 +394,6 @@ def importCall(request, collection, database=None):
                  
             out['ok_records_number'] = len(ok_records)
             
-    try:
-        mongo.connection.close()
-    except:
-        pass
-        
         
     return HttpResponse(json.dumps(out, default=bson.json_util.default))
     
@@ -469,14 +432,6 @@ def processObjects(request, collection, database=None):
     out = createBaseResponseObject()
     
     database = database or settings.MONGO_SERVER_DEFAULT_DB
-    mongo = MongoWrapper()
-    mongo.connect()
-    
-    try:
-        mongo.connection.close()
-    except:
-        pass
-    
     
     return HttpResponse(json.dumps(out, default=bson.json_util.default))
     
