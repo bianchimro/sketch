@@ -9,6 +9,14 @@
 {% block content_centered %}
    
 
+    <div id="blocks-toolbar">
+        <button class="btn" data-bind="click: addQuery">Q</Button>
+        <button class="btn" data-bind="click: addList">L</Button>
+        <button class="btn" data-bind="click: addItemList">ItemList</Button>
+        
+        <button class="btn" data-bind="click: addDbInfo">DB</Button>
+        
+    </div>
     <div id="blocks-canvas">
     </div>
     
@@ -34,17 +42,36 @@
         jsPlumb.ready(function(){
            jsPlumb.importDefaults({
     
-                ConnectorZIndex:5
+                //ConnectorZIndex:5
 	
             });
         
             
              jsPlumb.setRenderMode(jsPlumb.CANVAS);
             
-            var qb = sketchui.register.addBlock(new sketchui.QueryBlock(), '#blocks-canvas');
-            var db = sketchui.register.addBlock(new sketchui.DbInfoBlock(), '#blocks-canvas');
-            var li = sketchui.register.addBlock(new sketchui.ListBlock(), '#blocks-canvas');
             
+            var ToolBar = function(){
+            
+                var self=this;
+                self.addQuery = function(){
+                    var qb = sketchui.register.addBlock(new sketchui.QueryBlock(), '#blocks-canvas');       
+                };
+                self.addList = function(){
+                    var li = sketchui.register.addBlock(new sketchui.ListBlock(), '#blocks-canvas');
+                };
+                
+                 self.addItemList = function(){
+                    var db = sketchui.register.addBlock(new sketchui.ItemListBlock(), '#blocks-canvas');
+                };
+                
+                self.addDbInfo = function(){
+                    var db = sketchui.register.addBlock(new sketchui.DbInfoBlock(), '#blocks-canvas');
+                };
+            
+            
+            };
+            var tb = new ToolBar();
+            ko.applyBindings(tb, $("blocks-toolbar")[0]);
             
             
             

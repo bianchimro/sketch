@@ -16,6 +16,22 @@ html, body{
     width:300px;
 }
 
+.block{
+    position:absolute;
+    z-index:6;
+    border:solid #ccc 1px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    background: white;
+}
+
+.listblock{
+    max-width:500px;
+    min-width:150px;
+    max-height:500px;
+    overflow: scroll;
+}
 
 #map-container{
     width:100%;

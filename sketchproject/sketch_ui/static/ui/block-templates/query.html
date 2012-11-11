@@ -1,6 +1,8 @@
- <div class="modal modal-small ui-widget-content">
+ <div class="block ui-widget-content" >
      <div class="modal-header" data-bind="css: {run : !dirty(), notrun: dirty() }">
+         <button type="button" class="close" data-bind="click: remove">×</button>
          <h3 data-bind="text: name"></h3>
+        
      </div>
      <div class="modal-body">        
          <form>

@@ -17,9 +17,13 @@ sketchui.Register = function(){
             var targetBlock = self.blocks[info.targetId];
             
             //todo: generalize
-            targetBlock.inputObservables[targetLabel](sourceBlock.results());
+            if(sourceBlock.results()){
+                targetBlock.inputObservables[targetLabel](sourceBlock.results());
+                targetBlock.dirty(false);  
+            }
             targetBlock.inConnections[targetLabel] = sourceBlock.results.subscribe(function(newValue){
-                targetBlock.inputObservables[targetLabel](newValue);        
+                targetBlock.inputObservables[targetLabel](newValue);     
+                targetBlock.dirty(false);   
             });
             
                
@@ -31,9 +35,8 @@ sketchui.Register = function(){
             var sourceBlock = self.blocks[info.sourceId];
             var targetLabel = info.targetEndpoint.getLabel();
             var targetBlock = self.blocks[info.targetId];
-       
             targetBlock.inConnections[targetLabel].dispose();
-               
+            targetBlock.dirty(true);   
     });
     
     
@@ -51,11 +54,21 @@ sketchui.Register = function(){
         blo.generateInEndpoints();
         blo.setDraggable();
         
-        sketchui.register.blocks[blo.oid] = blo;
+        self.blocks[blo.oid] = blo;
+        blo.register = self;
         return blo;
     
     };
 
+    self.removeBlock = function(blo){
+    
+        ko.cleanNode($(blo.selector)[0]);
+        blo.destroy();
+        delete self.blocks[blo.oid];
+        jsPlumb.removeAllEndpoints($(blo.selector)[0]);
+        $(blo.selector).remove();
+    
+    };
 
 
 
@@ -72,6 +85,7 @@ sketchui.Block = function(options){
     
     
     var self=this;
+    self.register = null;
     self.oid = sketchjs.generateOid('block');
     
     self.connectorId = "connector-" + self.oid;
@@ -132,7 +146,7 @@ sketchui.Block = function(options){
         
         if(self.processor instanceof Function){
             self.processor(inputArgs, self);
-            self.dirty(false);
+            
         }
     
     };
@@ -165,23 +179,25 @@ sketchui.Block = function(options){
         return;
        } 
        
-       var sourceColor = "#ff9696";
+       var sourceColor = "blue";
        var sourceEndpoint = {
-           endpoint:["Dot", { radius:16 }],
+           endpoint:["Dot", { radius:20 }],
            paintStyle:{ fillStyle:sourceColor},
-           isSource:true,
+           isSource: true,
            connectorStyle:{ strokeStyle:sourceColor, lineWidth:2 },
-           connector: ["Bezier", { curviness:63 } ],
-           maxConnections:1,
-           //isTarget:true,
-           //dropOptions : targetDropOptions
+           connector: ["Bezier"],
+           overlays: [
+	        	[ "Arrow", { foldback:0.2 } ],
+	        	[ "Label", { cssClass:"labelClass" } ]	
+	        ],
+           maxConnections:10,
            anchor:"TopCenter"
        };
        
-            var output = self.output;
-            var opts = { anchor:"BottomCenter", label:output.name };
-            self.outEndpoints[output.name] = jsPlumb.addEndpoint($(self.selector),  opts, sourceEndpoint);
-            
+       var output = self.output;
+       var opts = { anchor:"BottomCenter", label:output.name };
+       self.outEndpoints[output.name] = jsPlumb.addEndpoint($(self.selector),  opts, sourceEndpoint);
+       
     
     };
     
@@ -205,7 +221,7 @@ sketchui.Block = function(options){
             if(!inp.connectable){
                 continue;
             }
-            var opts = { anchor:"BottomCenter", label:inp.name };
+            var opts = { anchor:"TopCenter", label:inp.name };
             self.inEndpoints[inp.name] = jsPlumb.addEndpoint($(self.selector),  opts, targetEndpoint);
             
             
@@ -221,12 +237,23 @@ sketchui.Block = function(options){
     self.setDraggable = function(){
     
         jsPlumb.draggable(self.oid, {
-            start : function(e,u){ jsPlumb.repaint(self.oid);},
-            drag : function(e,u){ jsPlumb.repaint(self.oid);},
-            stop : function(e,u){ jsPlumb.repaint(self.oid);}
+            //start : function(e,u){ jsPlumb.repaint(self.oid);},
+            //drag : function(e,u){ jsPlumb.repaint(self.oid);},
+            //stop : function(e,u){ jsPlumb.repaint(self.oid);}
     
         });    
 
+    };
+    
+    self.remove = function(){
+        return self.register.removeBlock(self);
+    
+    };
+    
+    
+    self.destroy = function(){
+        console.log("whe should dispose all notifications here ... and also remove all connections");
+    
     };
     
     
@@ -260,7 +287,7 @@ sketchui.QueryBlock = function(){
         sketch.objects({}, inputArgs.collection, { query: inputArgs.query }, function(response){
     
                context.results(response.results);
-               
+               self.dirty(false);
            });
     };
     
@@ -286,7 +313,7 @@ sketchui.DbInfoBlock = function(){
         var sketch = new sketchjs.Sketch("", 'sketchdb');
         sketch.getDbInfo({}, function(response){
                context.results(response.results);
-               
+               self.dirty(false);
             });
     };
     
@@ -305,7 +332,7 @@ sketchui.ListBlock = function(){
     
     options.name = "listblock";
     options.inputs = [{ name : 'results', type : 'objlist', connectable: true}];
-  
+    options.output = { name : 'results', type : 'objlist'};
     
     self = new sketchui.Block(options);
     
@@ -315,11 +342,55 @@ sketchui.ListBlock = function(){
     };
     
     
+    self.inputObservables['results'].subscribe(function(newValue){
+        self.results(newValue);
+    });
+    
+    
     return self;
 
 }
 
 
+sketchui.ItemListBlock = function(){
+
+    var options = {};
+    var self = this;
+    
+    
+    options.name = "listblock";
+    options.inputs = [{ name : 'results', type : 'objlist', connectable: true}];
+    options.output = { name : 'results', type : 'objlist'};
+    
+    self = new sketchui.Block(options);
+    
+    self.currentIndex = ko.observable(null);
+    self.currentItem = ko.computed(function(){
+        if(self.currentIndex() !== null){
+            return self.results()[self.currentIndex];
+        }
+    });
+
+   
+    self.results.subscribe(function(){
+        self.currentIndex(0);
+    });
+    
+    
+    self.templateUrl = '/static/ui/block-templates/itemlistblock.html';
+    self.fromjson=function(data){
+        return JSON.stringify(data);
+    };
+    
+    
+    self.inputObservables['results'].subscribe(function(newValue){
+        self.results(newValue);
+    });
+    
+    
+    return self;
+
+}
 
 
 
