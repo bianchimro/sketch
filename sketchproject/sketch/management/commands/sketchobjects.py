@@ -11,7 +11,7 @@ import sketch.mappermanager
 import sketch.processingmanager
 import sketch.formattersmanager
 import sketch.helpers
-import sketch.mongowrapper
+from sketch.mongowrapper import mongo
 import json
 import bson.json_util
 
@@ -90,13 +90,10 @@ class Command(BaseCommand):
         except:
             offset = 0
         
-        #TODO: get objects    
-        mongo = sketch.mongowrapper.MongoWrapper()
         
         out = sketch.helpers.createBaseResponseObject()
     
         try:
-            mongo.connect()
         
             existing_dbs = mongo.connection.database_names()
             if database not in existing_dbs:
@@ -116,12 +113,6 @@ class Command(BaseCommand):
         except Exception, e:
             out['errors'] = str(e)
             out['status'] = 0
-        
-        try:
-            mongo.connection.close()
-        except:
-            pass
-        
         
         print out
         

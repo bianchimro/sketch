@@ -10,7 +10,7 @@ import sketch.recordparser
 import sketch.mappermanager
 import sketch.processingmanager
 import sketch.helpers
-import sketch.mongowrapper
+from sketch.mongowrapper import mongo
 import sketch.recordparser
 import django.contrib.auth.models as authmodels
 import json
@@ -97,13 +97,6 @@ class Command(BaseCommand):
         out['error_records'] = { 'parser' : [], 'mapper' : [] }
         out['ok_records_number'] = 0
         
-        mongo = sketch.mongowrapper.MongoWrapper()
-        try:
-            mongo.connect()
-        except Exception, err:
-            print "Mongo connection error", str(err)
-            return
-        
         
         mapperName = mapper
         #todo: decide to use name or id for referencing mapper in request
@@ -171,10 +164,6 @@ class Command(BaseCommand):
              
         out['ok_records_number'] = len(ok_records)
             
-        try:
-            mongo.connection.close()
-        except:
-            pass
             
         print out
         

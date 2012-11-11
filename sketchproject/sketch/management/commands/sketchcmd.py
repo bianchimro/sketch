@@ -10,6 +10,7 @@ import sketch.recordparser
 import sketch.mappermanager
 import sketch.processingmanager
 import sketch.helpers
+from sketch.mongowrapper import mongo
 
 
 #TODO: replace all print statements with self.stdout.write('...')
@@ -49,13 +50,6 @@ class Command(BaseCommand):
         
         if drop_collection or drop_database:
         
-            mongo = sketch.mongowrapper.MongoWrapper()
-            try:
-                mongo.connect()
-            except Exception, err:
-                print "Mongo connection error", str(err)
-                return
-                
             if drop_collection:
                 mongo.dropCollection(database, drop_collection)
                 try:
@@ -73,9 +67,4 @@ class Command(BaseCommand):
                 except Exception, e:
                     print "Error during sql deletion:", str(e)
                 
-            try:
-                mongo.connection.close()
-            except:
-                pass
-            
     
