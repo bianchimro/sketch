@@ -6,17 +6,22 @@
      </div>
      <div class="modal-body">        
          <form>
-             <div data-bind="foreach: inputs">
+             <div>
          
                  <div>
-                     <label data-bind="text: name" ></label>
-                     <!-- ko if: type=='text' -->
-                         <input type="text" data-bind="value: $root.inputObservables[name]"/>
-                     <!-- /ko -->
-                     <!-- ko if: type=='textarea' -->
-                         <textarea data-bind="value: $root.inputObservables[name]"></textarea>
-                     <!-- /ko -->
-                 </div>
+                     <label>Collection</label>
+                     <input type="text" data-bind="value: inputObservables['collection']"/>
+                </div>
+                <div>
+                     <label>Query</label>
+                     <textarea data-bind="value: inputObservables['querystring']"></textarea>
+                </div>
+                <div>
+                    <label>Formatter</label>
+                    <select data-bind="options: formatters, value: inputObservables['formatter']"></select>
+                
+                </div>
+
                  
              </div>
          </form>

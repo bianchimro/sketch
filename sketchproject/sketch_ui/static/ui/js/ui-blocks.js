@@ -1,5 +1,7 @@
 var sketchui = sketchui || {};
 
+
+
 sketchui.Register = function(){
 
     
@@ -291,6 +293,7 @@ sketchui.QueryBlock = function(){
     options.inputs = [
         { 'name' : 'collection', type : 'text' },
         { 'name' : 'querystring', type : 'textarea' },        
+        { 'name' : 'formatter', type : 'text' },        
     ];
     options.output = { name : 'results', type : 'collection_name'};
     
@@ -303,7 +306,7 @@ sketchui.QueryBlock = function(){
         var sketch = new sketchjs.Sketch("", 'sketchdb');
         var dropCollection = self.results() || null;
         self.dirty(true);
-        sketch.objects({}, inputArgs.collection, { query: inputArgs.query, write_collection:true, drop_collection:dropCollection }, function(response){
+        sketch.objects({}, inputArgs.collection, { query: inputArgs.query, formatter: inputArgs.formatter, write_collection:true, drop_collection:dropCollection }, function(response){
                context.results(response.collection_out);
                self.dirty(false);
            });
@@ -324,6 +327,19 @@ sketchui.QueryBlock = function(){
     self.dirty.subscribe(function(newValue){
         self.preview(null);
     });
+    
+    
+    
+    //init code
+    self.formatters = ko.observableArray();
+    var sketch = new sketchjs.Sketch("", 'sketchdb');
+    sketch.getFormattersInfo(function(response){
+        self.formatters(response.results);
+    
+    });
+    
+    
+    
     
     return self;
 
