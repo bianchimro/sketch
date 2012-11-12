@@ -264,6 +264,11 @@ def objects(request, collection, database=None):
         else:
             formatter_callback = None
         
+        
+        drop_collection = request.GET.get('drop_collection', None)
+        if drop_collection:
+            mongo.dropCollection(database, drop_collection)
+        
         query_result = mongo.objects(database, collection, query_dict=query_dict, offset=offset, limit=limit, 
                                      formatter_callback=formatter_callback, write_collection=write_collection)
                                      
@@ -430,16 +435,26 @@ def processObjects(request, collection, database=None):
     if 'in_collection' in request.GET:
         in_collection = request.GET['in_collection']
         records = mongo.objectsFromCollection(database, in_collection)
-        
+    
+    
+    write_collection = getWriteCollection(request)
+    
+    
     processor = getProcessor(request)
-    if processor not in processingManager.processingFunctions:
-        pass
+    if processor not in processingManager.getProcessors():
+        raise
     
             
     #processing cycle
-    for record in records:
-        pass
-
+    if write_collection:
+        for record in records:
+            pass
+    
+    else:
+        for record in records:
+            pass
+    
+    
     out = createBaseResponseObject()
     
     database = database or settings.MONGO_SERVER_DEFAULT_DB

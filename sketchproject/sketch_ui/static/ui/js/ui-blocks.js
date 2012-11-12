@@ -29,9 +29,6 @@ sketchui.Register = function(){
                 targetBlock.dirty(false);   
             });
             
-            console.log("tl", targetLabel, sourceBlock.output);
-            
-            
             
                
     });
@@ -110,6 +107,7 @@ sketchui.Block = function(options){
     self.templateUrl = options.templateUrl;
     
     self.results = ko.observable();    
+    
     
     self.template = ko.observable("");
     
@@ -293,16 +291,29 @@ sketchui.QueryBlock = function(){
     options.output = { name : 'results', type : 'collection_name'};
     
     self = new sketchui.Block(options);
+    self.preview = ko.observable();
     
     self.templateUrl = '/static/ui/block-templates/query.html';
     self.processor = function(inputArgs, context){
     
         var sketch = new sketchjs.Sketch("", 'sketchdb');
-        sketch.objects({}, inputArgs.collection, { query: inputArgs.query, write_collection:true }, function(response){
+        var dropCollection = self.results() || null;
+        self.dirty(true);
+        sketch.objects({}, inputArgs.collection, { query: inputArgs.query, write_collection:true, drop_collection:dropCollection }, function(response){
                 console.log(response);  
                context.results(response.collection_out);
                self.dirty(false);
            });
+    };
+    
+    
+    self.getPreview = function(){
+        if(! self.dirty()){
+            var cname = self.results();
+        
+        }
+    
+    
     };
     
     return self;
@@ -429,6 +440,29 @@ sketchui.ItemListBlock = function(){
 }
 
 
+
+
+
+sketchui.ToolBar = function(){
+ 
+     var self=this;
+     self.addQuery = function(){
+         var qb = sketchui.register.addBlock(new sketchui.QueryBlock(), '#blocks-canvas');       
+     };
+     self.addList = function(){
+         var li = sketchui.register.addBlock(new sketchui.ListBlock(), '#blocks-canvas');
+     };
+     
+      self.addItemList = function(){
+         var db = sketchui.register.addBlock(new sketchui.ItemListBlock(), '#blocks-canvas');
+     };
+     
+     self.addDbInfo = function(){
+         var db = sketchui.register.addBlock(new sketchui.DbInfoBlock(), '#blocks-canvas');
+     };
+ 
+ 
+ };
 
 
 
