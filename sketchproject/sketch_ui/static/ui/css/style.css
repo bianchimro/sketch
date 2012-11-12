@@ -32,6 +32,10 @@ html, body{
     overflow: scroll;
 }
 
+.queryblock-preview{
+    padding: 10px;
+}
+
 
 
 .listblock{

@@ -306,8 +306,9 @@ sketchui.QueryBlock = function(){
     self.processor = function(inputArgs, context){
     
         var dropCollection = self.results() || null;
+        var formatter = self.formatterEnabled() ? inputArgs.formatter : '';
         self.dirty(true);
-        sketchui.sketch.objects({}, inputArgs.collection, { query: inputArgs.query, formatter: inputArgs.formatter, write_collection:true, drop_collection:dropCollection }, function(response){
+        sketchui.sketch.objects({}, inputArgs.collection, { query: inputArgs.query, formatter: formatter, write_collection:true, drop_collection:dropCollection }, function(response){
                context.results(response.collection_out);
                self.dirty(false);
            });
@@ -331,6 +332,8 @@ sketchui.QueryBlock = function(){
     
     
     //init code
+    
+    self.formatterEnabled = ko.observable(false);
     
     self.formatters = ko.observableArray();
     sketchui.sketch.getFormattersInfo(function(response){

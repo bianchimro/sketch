@@ -18,6 +18,9 @@
                      <textarea data-bind="value: inputObservables['querystring']"></textarea>
                 </div>
                 <div>
+                    <label class="checkbox"><input type="checkbox" data-bind="checked: formatterEnabled"/>Format records</label>
+                </div>
+                <div data-bind="visible: formatterEnabled">
                     <label>Formatter</label>
                     <select data-bind="options: formatters, value: inputObservables['formatter']"></select>
                 
@@ -40,7 +43,7 @@
          <button class="btn" data-bind="attr: {disabled: dirty() == true && !preview()}, click: getPreview">Preview</button>
          <button class="btn" data-bind="click: run">Run</button>
      </div>
-     <div data-bind="visible: preview">
+     <div data-bind="visible: preview" class="queryblock-preview">
         <h4>Preview</h4>
         <div data-bind="foreach: preview">
             <div data-bind="text: $parent.fromjson($data)"></div>
