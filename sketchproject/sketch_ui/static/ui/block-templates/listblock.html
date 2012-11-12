@@ -5,7 +5,7 @@
      </div>
      <div class="modal-body">        
 
-             <div data-bind="foreach: inputObservables['results']">
+             <div data-bind="foreach: results()">
          
                  <div data-bind="text: $root.fromjson($data)">
                  </div>
