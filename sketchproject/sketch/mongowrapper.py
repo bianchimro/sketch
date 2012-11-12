@@ -94,7 +94,7 @@ class MongoWrapper(object):
     
         
     
-    def objects(self, db_name, collection_name, query_dict={}, offset=0, limit=100, formatter_callback=None):
+    def objects(self, db_name, collection_name, query_dict={}, offset=0, limit=100, formatter_callback=None, write_collection=False):
         """
         Performs find on a collection, with offset and limit parameters
         
@@ -108,6 +108,13 @@ class MongoWrapper(object):
         records = []
         counted = 0
         has_more = False
+        collection_out = None
+        
+        if write_collection:
+            offset = 0
+            limit = None
+            collection_out = self.get_results_collection_name()
+        
         
         for r in cursor[offset:]:
             if counted < limit or limit is None:
@@ -117,13 +124,16 @@ class MongoWrapper(object):
                         r = formatter_callback(r)
                     except:
                         continue
-                records.append(r)
+                if write_collection:
+                    self._insert(db_name, collection_name, r)
+                else:
+                    records.append(r)
                 counted += 1
             else:
                 has_more = True
                 break
         
-        out = {'records' : records, 'has_more' : has_more, 'num_records' : counted }
+        out = {'records' : records, 'has_more' : has_more, 'num_records' : counted, 'collection_out' : collection_out }
         return out
     
     

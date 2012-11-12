@@ -14,7 +14,8 @@ import bson.json_util
 import decorators
 from mongowrapper import mongo
 from helpers import createBaseResponseObject, createResponseObjectWithError
-from helpers import getQueryDict, getOffset, getLimit, getFormatter, getMapper, instanceDict
+from helpers import getQueryDict, getOffset, getLimit, getFormatter, getMapper, getWriteCollection, instanceDict
+from formattersmanager import formattersManager
 import recordparser
 
 from models import SketchMapper, SketchCollection
@@ -252,10 +253,10 @@ def objects(request, collection, database=None):
         query_dict = getQueryDict(request)
         offset = getOffset(request)
         limit = getLimit(request)
+        write_collection = getWriteCollection(request)
 
         formatter = getFormatter(request)
         
-        from formattersmanager import formattersManager
         formatters = formattersManager.getFormatters()
         if formatter and formatter not in formatters:
             raise Exception("Formatter %s is not available" % str(formatter))

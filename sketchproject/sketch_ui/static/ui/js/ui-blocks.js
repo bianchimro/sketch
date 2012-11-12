@@ -284,7 +284,7 @@ sketchui.QueryBlock = function(){
     self.processor = function(inputArgs, context){
     
         var sketch = new sketchjs.Sketch("", 'sketchdb');
-        sketch.objects({}, inputArgs.collection, { query: inputArgs.query }, function(response){
+        sketch.objects({}, inputArgs.collection, { query: inputArgs.query, write_collection:true }, function(response){
     
                context.results(response.results);
                self.dirty(false);

@@ -92,3 +92,9 @@ def getFormatter(request, var_name='formatter'):
 def getMapper(request, var_name='mapper'):
     mapper = request.GET.get(var_name) or request.POST.get(var_name)
     return mapper 
+
+
+def getWriteCollection(request, var_name='write_collection'):
+    to_collection = var_name in request.GET or var_name in request.POST
+    return to_collection 
+ 
