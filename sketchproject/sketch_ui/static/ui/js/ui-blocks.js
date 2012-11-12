@@ -185,6 +185,10 @@ sketchui.Block = function(options){
     
     };
     
+    self.fromjson=function(data){
+        return JSON.stringify(data);
+    };
+    
     self.generateOutEndpoints = function(){
     
        if(!self.output){
@@ -300,7 +304,6 @@ sketchui.QueryBlock = function(){
         var dropCollection = self.results() || null;
         self.dirty(true);
         sketch.objects({}, inputArgs.collection, { query: inputArgs.query, write_collection:true, drop_collection:dropCollection }, function(response){
-                console.log(response);  
                context.results(response.collection_out);
                self.dirty(false);
            });
@@ -309,12 +312,18 @@ sketchui.QueryBlock = function(){
     
     self.getPreview = function(){
         if(! self.dirty()){
-            var cname = self.results();
+            var collectionName = self.results();
+            var sketch = new sketchjs.Sketch("", 'sketchdb');
+            sketch.objects({}, collectionName, { limit: 10}, function(response){
+               self.preview(response.results);
+           })
         
         }
-    
-    
     };
+    
+    self.dirty.subscribe(function(newValue){
+        self.preview(null);
+    });
     
     return self;
 
@@ -362,13 +371,9 @@ sketchui.ListBlock = function(){
     self = new sketchui.Block(options);
     
     self.templateUrl = '/static/ui/block-templates/listblock.html';
-    self.fromjson=function(data){
-        return JSON.stringify(data);
-    };
     
     
     self.inputObservables['in_collection'].subscribe(function(newValue){
-        console.log();
         var inputType = self.inConnectionsMeta['in_collection']['type']; 
         if(inputType == 'collection_name'){
             self.readRecords(newValue);
