@@ -285,8 +285,8 @@ sketchui.QueryBlock = function(){
     
         var sketch = new sketchjs.Sketch("", 'sketchdb');
         sketch.objects({}, inputArgs.collection, { query: inputArgs.query, write_collection:true }, function(response){
-    
-               context.results(response.results);
+                console.log(response);  
+               context.results(response.collection_out);
                self.dirty(false);
            });
     };
@@ -331,7 +331,7 @@ sketchui.ListBlock = function(){
     var self = this;
     
     options.name = "listblock";
-    options.inputs = [{ name : 'results', type : 'objlist', connectable: true}];
+    options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true}];
     options.output = { name : 'results', type : 'objlist'};
     
     self = new sketchui.Block(options);
@@ -342,9 +342,22 @@ sketchui.ListBlock = function(){
     };
     
     
-    self.inputObservables['results'].subscribe(function(newValue){
-        self.results(newValue);
+    self.inputObservables['in_collection'].subscribe(function(newValue){
+        self.readRecords(newValue);
     });
+    
+    
+    self.readRecords = function(collectionName){
+    
+        var sketch = new sketchjs.Sketch("", 'sketchdb');
+        sketch.objects({}, collectionName, {  }, function(response){
+               console.log("r", response.results);
+               self.results(response.results);
+               self.dirty(false);
+           });
+    };
+    
+    
     
     
     return self;

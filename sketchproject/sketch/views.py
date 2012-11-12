@@ -14,7 +14,7 @@ import bson.json_util
 import decorators
 from mongowrapper import mongo
 from helpers import createBaseResponseObject, createResponseObjectWithError
-from helpers import getQueryDict, getOffset, getLimit, getFormatter, getMapper, getWriteCollection, instanceDict
+from helpers import getQueryDict, getOffset, getLimit, getFormatter, getMapper, getWriteCollection, getProcessor, instanceDict
 from formattersmanager import formattersManager
 import recordparser
 
@@ -254,7 +254,6 @@ def objects(request, collection, database=None):
         offset = getOffset(request)
         limit = getLimit(request)
         write_collection = getWriteCollection(request)
-
         formatter = getFormatter(request)
         
         formatters = formattersManager.getFormatters()
@@ -266,11 +265,11 @@ def objects(request, collection, database=None):
             formatter_callback = None
         
         query_result = mongo.objects(database, collection, query_dict=query_dict, offset=offset, limit=limit, 
-                                     formatter_callback=formatter_callback)
-        records = query_result['records']
-        has_more = query_result['has_more']
-        out['results'] = records
-        out['has_more'] = has_more
+                                     formatter_callback=formatter_callback, write_collection=write_collection)
+                                     
+        out['results'] = query_result['records']
+        out['has_more'] = query_result['has_more']
+        out['collection_out'] = query_result['collection_out']
     
     except Exception, e:
         raise
@@ -415,6 +414,8 @@ def processObjects(request, collection, database=None):
     #TODO: consider writing output to a collection
     #TODO: leverage map/reduce when possible
     
+    database = database or settings.MONGO_SERVER_DEFAULT_DB
+    from processingmanager import processingManager    
 
     if 'ids' in request.GET:
         ids = request.GET['ids']
@@ -425,6 +426,15 @@ def processObjects(request, collection, database=None):
         query = request.GET['query']
         #todo: get records by query
         records = []
+        
+    if 'in_collection' in request.GET:
+        in_collection = request.GET['in_collection']
+        records = mongo.objectsFromCollection(database, in_collection)
+        
+    processor = getProcessor(request)
+    if processor not in processingManager.processingFunctions:
+        pass
+    
             
     #processing cycle
     for record in records:

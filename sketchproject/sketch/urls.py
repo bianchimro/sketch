@@ -11,6 +11,8 @@ urlpatterns = patterns('sketch.views',
     url(r'objects/(?P<collection>\w+)/$', 'objects'),
     url(r'objects/(?P<database>\w+)/(?P<collection>\w+)/$', 'objects'),
     
+    #url(r'process-objects/(?P<database>\w+)/(?P<collection>\w+)/$', 'process-objects'),
+    
     #todo: probably this should be handled as a "POST" request to objects
     url(r'import/(?P<collection>\w+)/$', 'importCall'),
     url(r'import/(?P<database>\w+)/(?P<collection>\w+)/$', 'importCall'),
