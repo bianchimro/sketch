@@ -174,9 +174,8 @@ sketchjs.Sketch.prototype.objects = function(options, collection, data, successC
 
     var url = this.url + "/sketch/objects/" + db + "/" + collection + "/";
     console.log("objects", url);
-    //#TODO: this should be a GET
     $.ajax({
-        type: 'POST',
+        type: 'GET',
         url: url,
         data: data,
         success: successCallback,

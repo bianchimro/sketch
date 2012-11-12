@@ -1,5 +1,7 @@
 var sketchui = sketchui || {};
 
+
+
 sketchui.Register = function(){
 
     
@@ -14,17 +16,21 @@ sketchui.Register = function(){
             var sourceLabel = info.sourceEndpoint.getLabel();
             var sourceBlock = self.blocks[info.sourceId];
             var targetLabel = info.targetEndpoint.getLabel();
+            var sourceLabel = info.sourceEndpoint.getLabel();
             var targetBlock = self.blocks[info.targetId];
             
             //todo: generalize
             if(sourceBlock.results()){
+                targetBlock.inConnectionsMeta[targetLabel] = sourceBlock.output;
                 targetBlock.inputObservables[targetLabel](sourceBlock.results());
                 targetBlock.dirty(false);  
             }
             targetBlock.inConnections[targetLabel] = sourceBlock.results.subscribe(function(newValue){
+                targetBlock.inConnectionsMeta[targetLabel] = sourceBlock.output;
                 targetBlock.inputObservables[targetLabel](newValue);     
                 targetBlock.dirty(false);   
             });
+            
             
                
     });
@@ -104,17 +110,21 @@ sketchui.Block = function(options){
     
     self.results = ko.observable();    
     
+    
     self.template = ko.observable("");
     
     self.inEndpoints = {};
     self.outEndpoints = {};
     
     self.inConnections = {};
+    self.inConnectionsMeta = {};
+    
     self.outConnections = {};
     
     
     
     self.inputObservables = {};
+    self.inputMeta = {}
     
     for(var i=0;i<self.numInputs; i++){
         var inp = self.inputs[i];
@@ -123,6 +133,9 @@ sketchui.Block = function(options){
         self.inputObservables[inp.name].subscribe(function(newV){
             self.dirty(true);
         });
+        
+        self.inputMeta[inp.name] = inp;
+    
     }
     
     
@@ -158,6 +171,7 @@ sketchui.Block = function(options){
             url : self.templateUrl,
             type : 'GET',
             async : false,
+            cache : false,
             success : function(data){
                 self.template(data);
             }
@@ -171,6 +185,10 @@ sketchui.Block = function(options){
         self._getTemplate();
         return self.template();
     
+    };
+    
+    self.fromjson=function(data){
+        return JSON.stringify(data);
     };
     
     self.generateOutEndpoints = function(){
@@ -221,7 +239,7 @@ sketchui.Block = function(options){
             if(!inp.connectable){
                 continue;
             }
-            var opts = { anchor:"TopCenter", label:inp.name };
+            var opts = { anchors:"TopCenter", label:inp.name };
             self.inEndpoints[inp.name] = jsPlumb.addEndpoint($(self.selector),  opts, targetEndpoint);
             
             
@@ -275,21 +293,53 @@ sketchui.QueryBlock = function(){
     options.inputs = [
         { 'name' : 'collection', type : 'text' },
         { 'name' : 'querystring', type : 'textarea' },        
+        { 'name' : 'formatter', type : 'text' },        
     ];
-    options.output = { name : 'results', type : 'objlist'};
+    options.output = { name : 'results', type : 'collection_name'};
     
     self = new sketchui.Block(options);
+    self.preview = ko.observable();
     
     self.templateUrl = '/static/ui/block-templates/query.html';
     self.processor = function(inputArgs, context){
     
         var sketch = new sketchjs.Sketch("", 'sketchdb');
-        sketch.objects({}, inputArgs.collection, { query: inputArgs.query }, function(response){
-    
-               context.results(response.results);
+        var dropCollection = self.results() || null;
+        self.dirty(true);
+        sketch.objects({}, inputArgs.collection, { query: inputArgs.query, formatter: inputArgs.formatter, write_collection:true, drop_collection:dropCollection }, function(response){
+               context.results(response.collection_out);
                self.dirty(false);
            });
     };
+    
+    
+    self.getPreview = function(){
+        if(! self.dirty()){
+            var collectionName = self.results();
+            var sketch = new sketchjs.Sketch("", 'sketchdb');
+            sketch.objects({}, collectionName, { limit: 10}, function(response){
+               self.preview(response.results);
+           })
+        
+        }
+    };
+    
+    self.dirty.subscribe(function(newValue){
+        self.preview(null);
+    });
+    
+    
+    
+    //init code
+    self.formatters = ko.observableArray();
+    var sketch = new sketchjs.Sketch("", 'sketchdb');
+    sketch.getFormattersInfo(function(response){
+        self.formatters(response.results);
+    
+    });
+    
+    
+    
     
     return self;
 
@@ -303,7 +353,7 @@ sketchui.DbInfoBlock = function(){
     
     options.name = "dbinfo";
     options.inputs = [];
-    options.output = { name : 'results', type : 'objlist'};
+    options.output = { name : 'results', type : 'objects_list'};
     
     self = new sketchui.Block(options);
     
@@ -331,20 +381,38 @@ sketchui.ListBlock = function(){
     var self = this;
     
     options.name = "listblock";
-    options.inputs = [{ name : 'results', type : 'objlist', connectable: true}];
-    options.output = { name : 'results', type : 'objlist'};
+    options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true}];
+    options.output = { name : 'results', type : 'objects_list'};
     
     self = new sketchui.Block(options);
     
     self.templateUrl = '/static/ui/block-templates/listblock.html';
-    self.fromjson=function(data){
-        return JSON.stringify(data);
+    
+    
+    self.inputObservables['in_collection'].subscribe(function(newValue){
+        var inputType = self.inConnectionsMeta['in_collection']['type']; 
+        if(inputType == 'collection_name'){
+            self.readRecords(newValue);
+        }
+        if(inputType == 'objects_list'){
+            self.results(newValue);
+        }
+        
+        
+    });
+    
+    
+    
+    self.readRecords = function(collectionName){
+    
+        var sketch = new sketchjs.Sketch("", 'sketchdb');
+        sketch.objects({}, collectionName, {  }, function(response){
+               self.results(response.results);
+               self.dirty(false);
+           });
     };
     
     
-    self.inputObservables['results'].subscribe(function(newValue){
-        self.results(newValue);
-    });
     
     
     return self;
@@ -359,8 +427,8 @@ sketchui.ItemListBlock = function(){
     
     
     options.name = "listblock";
-    options.inputs = [{ name : 'results', type : 'objlist', connectable: true}];
-    options.output = { name : 'results', type : 'objlist'};
+    options.inputs = [{ name : 'results', type : 'objects_list', connectable: true}];
+    options.output = { name : 'results', type : 'objects_list'};
     
     self = new sketchui.Block(options);
     
@@ -393,6 +461,29 @@ sketchui.ItemListBlock = function(){
 }
 
 
+
+
+
+sketchui.ToolBar = function(){
+ 
+     var self=this;
+     self.addQuery = function(){
+         var qb = sketchui.register.addBlock(new sketchui.QueryBlock(), '#blocks-canvas');       
+     };
+     self.addList = function(){
+         var li = sketchui.register.addBlock(new sketchui.ListBlock(), '#blocks-canvas');
+     };
+     
+      self.addItemList = function(){
+         var db = sketchui.register.addBlock(new sketchui.ItemListBlock(), '#blocks-canvas');
+     };
+     
+     self.addDbInfo = function(){
+         var db = sketchui.register.addBlock(new sketchui.DbInfoBlock(), '#blocks-canvas');
+     };
+ 
+ 
+ };
 
 
 
@@ -450,7 +541,7 @@ sketchui.queryBlock = {
         { 'name' : 'collection', type : 'text' },
         { 'name' : 'querystring', type : 'textarea' },        
     ],
-    output : { name : 'results', type : 'objlist'},
+    output : { name : 'results', type : 'objects_list'},
     templateUrl : '/static/ui/block-templates/query.html',
     processor : function(inputArgs, context){
     
@@ -471,7 +562,7 @@ sketchui.dbInfoBlock = {
     inputs : [
      
     ],
-    output : { name : 'results', type : 'objlist'},
+    output : { name : 'results', type : 'objects_list'},
     templateUrl : '/static/ui/block-templates/dbinfo.html',
     processor : function(inputArgs, context){
     

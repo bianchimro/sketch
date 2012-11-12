@@ -70,7 +70,7 @@ def getLimit(request, var_name='limit'):
     limit = request.GET.get(var_name) or request.POST.get(var_name)
     try:
         obj = int(limit)
-        return max(obj, settings.DEFAULT_QUERY_LIMIT)
+        return min(obj, settings.DEFAULT_QUERY_LIMIT)
     except:
         return settings.DEFAULT_QUERY_LIMIT    
         
@@ -92,3 +92,15 @@ def getFormatter(request, var_name='formatter'):
 def getMapper(request, var_name='mapper'):
     mapper = request.GET.get(var_name) or request.POST.get(var_name)
     return mapper 
+
+def getProcessor(request, var_name='processor'):
+    processor = request.GET.get(var_name) or request.POST.get(var_name)
+    return processor 
+
+
+
+
+def getWriteCollection(request, var_name='write_collection'):
+    to_collection = var_name in request.GET or var_name in request.POST
+    return to_collection 
+ 

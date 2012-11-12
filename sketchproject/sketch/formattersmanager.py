@@ -9,6 +9,7 @@ import operator
 
 formattersManager = RecordFormatter()
 
+#TODO: CONSIDER GENERATORS!
 
 #example formatter function
 def dummyFormatter(record):
@@ -42,9 +43,36 @@ def foursquare_geojson(object):
     return out
 
 
+def twitter_geojson(object):
+    """
+    Returns geojson object from a Foursquare data record.
+    Only the id attribute is passed in geometric feature property.
+    """
+    
+    
+    geom = object['coordinates']
+
+    properties = dict()
+    properties['id'] = object['id']
+    
+    out =   { "type": "FeatureCollection",
+              "features": [
+                  { "type": "Feature",
+                     "geometry":  geom ,
+                     "properties" : properties
+                  }
+              ]
+            }
+
+    #TODO: CONSIDER GENERATORS EVERYWHERE IN FORMATTERS
+    yield out
+
+
+
+
 #registering the formatting functions
 formattersManager.registerFormattingFunction(dummyFormatter)
 formattersManager.registerFormattingFunction(foursquare_geojson)
-
+formattersManager.registerFormattingFunction(twitter_geojson)
 
 #TODO: AUTODISCOVER FORMATTING FUNCTIONS

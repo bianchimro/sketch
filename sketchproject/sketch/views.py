@@ -14,7 +14,8 @@ import bson.json_util
 import decorators
 from mongowrapper import mongo
 from helpers import createBaseResponseObject, createResponseObjectWithError
-from helpers import getQueryDict, getOffset, getLimit, getFormatter, getMapper, instanceDict
+from helpers import getQueryDict, getOffset, getLimit, getFormatter, getMapper, getWriteCollection, getProcessor, instanceDict
+from formattersmanager import formattersManager
 import recordparser
 
 from models import SketchMapper, SketchCollection
@@ -252,10 +253,10 @@ def objects(request, collection, database=None):
         query_dict = getQueryDict(request)
         offset = getOffset(request)
         limit = getLimit(request)
-
+        print "uuu", limit
+        write_collection = getWriteCollection(request)
         formatter = getFormatter(request)
         
-        from formattersmanager import formattersManager
         formatters = formattersManager.getFormatters()
         if formatter and formatter not in formatters:
             raise Exception("Formatter %s is not available" % str(formatter))
@@ -264,12 +265,17 @@ def objects(request, collection, database=None):
         else:
             formatter_callback = None
         
+        
+        drop_collection = request.GET.get('drop_collection', None)
+        if drop_collection:
+            mongo.dropCollection(database, drop_collection)
+        
         query_result = mongo.objects(database, collection, query_dict=query_dict, offset=offset, limit=limit, 
-                                     formatter_callback=formatter_callback)
-        records = query_result['records']
-        has_more = query_result['has_more']
-        out['results'] = records
-        out['has_more'] = has_more
+                                     formatter_callback=formatter_callback, write_collection=write_collection)
+                                     
+        out['results'] = query_result['records']
+        out['has_more'] = query_result['has_more']
+        out['collection_out'] = query_result['collection_out']
     
     except Exception, e:
         raise
@@ -414,6 +420,8 @@ def processObjects(request, collection, database=None):
     #TODO: consider writing output to a collection
     #TODO: leverage map/reduce when possible
     
+    database = database or settings.MONGO_SERVER_DEFAULT_DB
+    from processingmanager import processingManager    
 
     if 'ids' in request.GET:
         ids = request.GET['ids']
@@ -424,11 +432,30 @@ def processObjects(request, collection, database=None):
         query = request.GET['query']
         #todo: get records by query
         records = []
+        
+    if 'in_collection' in request.GET:
+        in_collection = request.GET['in_collection']
+        records = mongo.objectsFromCollection(database, in_collection)
+    
+    
+    write_collection = getWriteCollection(request)
+    
+    
+    processor = getProcessor(request)
+    if processor not in processingManager.getProcessors():
+        raise
+    
             
     #processing cycle
-    for record in records:
-        pass
-
+    if write_collection:
+        for record in records:
+            pass
+    
+    else:
+        for record in records:
+            pass
+    
+    
     out = createBaseResponseObject()
     
     database = database or settings.MONGO_SERVER_DEFAULT_DB
