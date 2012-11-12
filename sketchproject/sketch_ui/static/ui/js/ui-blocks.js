@@ -123,8 +123,6 @@ sketchui.Block = function(options){
     
     self.outConnections = {};
     
-    
-    
     self.inputObservables = {};
     self.inputMeta = {}
     
@@ -183,15 +181,18 @@ sketchui.Block = function(options){
     
     };
     
+    
     self.getTemplate = function(){
         self._getTemplate();
         return self.template();
     
     };
     
+    
     self.fromjson=function(data){
         return JSON.stringify(data);
     };
+    
     
     self.generateOutEndpoints = function(){
     
@@ -221,6 +222,7 @@ sketchui.Block = function(options){
     
     };
     
+    
     self.generateInEndpoints = function(){
     
         
@@ -246,10 +248,6 @@ sketchui.Block = function(options){
             
             
         }
-    
-
-    
-    
     };
     
     
@@ -265,6 +263,7 @@ sketchui.Block = function(options){
 
     };
     
+    
     self.remove = function(){
         return self.register.removeBlock(self);
     
@@ -276,12 +275,8 @@ sketchui.Block = function(options){
     
     };
     
-    
-
     return self;
     
-    
-
 };
 
 
@@ -297,6 +292,7 @@ sketchui.QueryBlock = function(){
         { 'name' : 'querystring', type : 'textarea' },        
         { 'name' : 'formatter', type : 'text' },        
     ];
+    
     options.output = { name : 'results', type : 'collection_name'};
     
     self = new sketchui.Block(options);
@@ -345,9 +341,6 @@ sketchui.QueryBlock = function(){
     sketchui.sketch.getDbInfo({}, function(response){
                self.availableCollections(response.results);
     });
-    
-    
-    
     
     
     return self;
@@ -410,7 +403,6 @@ sketchui.ListBlock = function(){
     });
     
     
-    
     self.readRecords = function(collectionName){
     
         sketchui.sketch.objects({}, collectionName, {  }, function(response){
@@ -419,9 +411,7 @@ sketchui.ListBlock = function(){
            });
     };
     
-    
-    
-    
+
     return self;
 
 }
