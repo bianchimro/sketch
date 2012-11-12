@@ -1,6 +1,9 @@
 var sketchui = sketchui || {};
 
 
+//sketch instance global to sketchui
+sketchui.sketch = new sketchjs.Sketch("", 'sketchdb');
+
 
 sketchui.Register = function(){
 
@@ -303,10 +306,9 @@ sketchui.QueryBlock = function(){
     self.templateUrl = '/static/ui/block-templates/query.html';
     self.processor = function(inputArgs, context){
     
-        var sketch = new sketchjs.Sketch("", 'sketchdb');
         var dropCollection = self.results() || null;
         self.dirty(true);
-        sketch.objects({}, inputArgs.collection, { query: inputArgs.query, formatter: inputArgs.formatter, write_collection:true, drop_collection:dropCollection }, function(response){
+        sketchui.sketch.objects({}, inputArgs.collection, { query: inputArgs.query, formatter: inputArgs.formatter, write_collection:true, drop_collection:dropCollection }, function(response){
                context.results(response.collection_out);
                self.dirty(false);
            });
@@ -316,8 +318,7 @@ sketchui.QueryBlock = function(){
     self.getPreview = function(){
         if(! self.dirty()){
             var collectionName = self.results();
-            var sketch = new sketchjs.Sketch("", 'sketchdb');
-            sketch.objects({}, collectionName, { limit: 10}, function(response){
+            sketchui.sketch.objects({}, collectionName, { limit: 10}, function(response){
                self.preview(response.results);
            })
         
@@ -332,8 +333,7 @@ sketchui.QueryBlock = function(){
     
     //init code
     self.formatters = ko.observableArray();
-    var sketch = new sketchjs.Sketch("", 'sketchdb');
-    sketch.getFormattersInfo(function(response){
+    sketchui.sketch.getFormattersInfo(function(response){
         self.formatters(response.results);
     
     });
@@ -360,8 +360,7 @@ sketchui.DbInfoBlock = function(){
     self.templateUrl = '/static/ui/block-templates/dbinfo.html';
     self.processor = function(inputArgs, context){
     
-        var sketch = new sketchjs.Sketch("", 'sketchdb');
-        sketch.getDbInfo({}, function(response){
+        sketchui.sketch.getDbInfo({}, function(response){
                context.results(response.results);
                self.dirty(false);
             });
@@ -405,8 +404,7 @@ sketchui.ListBlock = function(){
     
     self.readRecords = function(collectionName){
     
-        var sketch = new sketchjs.Sketch("", 'sketchdb');
-        sketch.objects({}, collectionName, {  }, function(response){
+        sketchui.sketch.objects({}, collectionName, {  }, function(response){
                self.results(response.results);
                self.dirty(false);
            });
@@ -545,8 +543,7 @@ sketchui.queryBlock = {
     templateUrl : '/static/ui/block-templates/query.html',
     processor : function(inputArgs, context){
     
-        var sketch = new sketchjs.Sketch("", 'sketchdb');
-        sketch.objects({}, inputArgs.collection, { query: inputArgs.query }, function(response){
+        sketchui.sketch.objects({}, inputArgs.collection, { query: inputArgs.query }, function(response){
                 context.results(response.results);
                
            });
@@ -566,8 +563,7 @@ sketchui.dbInfoBlock = {
     templateUrl : '/static/ui/block-templates/dbinfo.html',
     processor : function(inputArgs, context){
     
-        var sketch = new sketchjs.Sketch("", 'sketchdb');
-        sketch.getDbInfo({}, function(response){
+        sketchui.sketch.getDbInfo({}, function(response){
                context.results(response.results);
                
             });
