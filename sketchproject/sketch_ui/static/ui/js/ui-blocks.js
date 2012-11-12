@@ -52,16 +52,7 @@ sketchui.Register = function(){
     
     self.addBlock = function(blo, containerSelector){
 
-        var template = blo.getTemplate();
-        var jTemplate = $(template);
-        jTemplate.attr("id", blo.oid);
-        
-        $(containerSelector).append(jTemplate);
-        ko.applyBindings(blo, $(blo.selector)[0]);
-        blo.generateOutEndpoints();
-        blo.generateInEndpoints();
-        blo.setDraggable();
-        
+        blo = blo.renderInContainer(containerSelector);
         self.blocks[blo.oid] = blo;
         blo.register = self;
         return blo;
@@ -139,6 +130,44 @@ sketchui.Block = function(options){
     }
     
     
+    
+    self.renderInContainer = function(containerSelector){
+        
+        var template = self.getTemplate();
+        var jTemplate = $(template);
+        jTemplate.attr("id", self.oid);
+        
+        $(containerSelector).append(jTemplate);
+        if(self.postRender instanceof Function){
+            self.postRender();
+        }
+        ko.applyBindings(self, $(self.selector)[0]);
+        self.generateOutEndpoints();
+        self.generateInEndpoints();
+        self.setDraggable();
+
+        return self;
+    
+    };
+    
+    
+    self.minimize = function(){
+        $('.modal-body', self.selector).hide();
+        $('.modal-footer', self.selector).hide();
+        jsPlumb.repaint(self.oid);
+    };
+    
+    self.maximize = function(){
+        $('.modal-body', self.selector).show();
+        $('.modal-footer', self.selector).show();
+        jsPlumb.repaint(self.oid);
+    }
+
+    
+    
+    
+    
+    
     self.inputsArgs = ko.computed(
         
         function(){
@@ -200,18 +229,19 @@ sketchui.Block = function(options){
         return;
        } 
        
-       var sourceColor = "blue";
+       var sourceColor = "#ccc";
        var sourceEndpoint = {
            endpoint:["Dot", { radius:20 }],
            paintStyle:{ fillStyle:sourceColor},
            isSource: true,
-           connectorStyle:{ strokeStyle:sourceColor, lineWidth:2 },
+           connectorStyle:{ strokeStyle:sourceColor, lineWidth:5 },
            connector: ["Bezier"],
            overlays: [
 	        	[ "Arrow", { foldback:0.2 } ],
 	        	[ "Label", { cssClass:"labelClass" } ]	
 	        ],
            maxConnections:10,
+           connectionsDetachable : true,
            anchor:"TopCenter"
        };
        
@@ -231,9 +261,10 @@ sketchui.Block = function(options){
            endpoint:["Dot", { radius:16 }],
            paintStyle:{ fillStyle:targetColor},
            isTarget:true,
-           connectorStyle:{ strokeStyle:targetColor, lineWidth:2 },
+           connectorStyle:{ },
            connector: ["Bezier", { curviness:63 } ],
            maxConnections:1,
+           connectionsDetachable : true
            //isTarget:true,
            //dropOptions : targetDropOptions
        };
@@ -414,7 +445,114 @@ sketchui.ListBlock = function(){
 
     return self;
 
+};
+
+
+
+sketchui.MapBlock = function(){
+
+    var options = {};
+    var self = this;
+    
+    options.name = "mapblock";
+    options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true}];
+    options.output = { name : 'results', type : 'objects_list'};
+    
+    self = new sketchui.Block(options);
+    
+    self.templateUrl = '/static/ui/block-templates/map.html';
+    
+    
+    self.inputObservables['in_collection'].subscribe(function(newValue){
+        var inputType = self.inConnectionsMeta['in_collection']['type']; 
+        if(inputType == 'collection_name'){
+            self.readRecords(newValue);
+        }
+        if(inputType == 'objects_list'){
+            self.results(newValue);
+        }
+        
+        
+    });
+    
+    
+    self.readRecords = function(collectionName){
+    
+        sketchui.sketch.objects({}, collectionName, {  }, function(response){
+               self.results(response.results);
+               self.dirty(false);
+           });
+    };
+    
+    
+    self.postRender = function(){
+
+            self.map = new OpenLayers.Map('map');
+            var osm = new OpenLayers.Layer.OSM();
+            self.map.addLayer(osm);
+            
+            
+            /*
+            var geojson_layer = new OpenLayers.Layer.Vector("GeoJSON", {
+                strategies: [new OpenLayers.Strategy.BBOX()],
+                protocol: new OpenLayers.Protocol.HTTP({
+                    //url : '/static/geogeneric/l1.geojson',
+                    url: "/geo/layer/1",
+                    format: new OpenLayers.Format.GeoJSON()
+                })
+            });
+            
+
+            map.addLayer(geojson_layer);        
+            map.setCenter(new OpenLayers.LonLat(11000, 45000),10);
+            */
+            self.map.zoomToMaxExtent();            
+    
+    };
+    
+    
+    self.addLayer = function(results){
+    
+        //delete self.geojson_layer;
+    
+        self.geojson_layer = new OpenLayers.Layer.Vector("GeoJSON");
+        var geojson_format = new OpenLayers.Format.GeoJSON({
+            'internalProjection': self.map.baseLayer.projection,
+            'externalProjection': new OpenLayers.Projection("EPSG:4326")
+        });
+        
+        for(var i=0,n=results.length;i<n;i++){
+            var fr = geojson_format.read(JSON.stringify(results[i]));
+            self.geojson_layer.addFeatures(fr);
+        }
+        
+        self.map.addLayer(self.geojson_layer);
+        self.map.zoomToExtent(self.geojson_layer.getDataExtent());
+    
+    };
+    
+    
+    self.results.subscribe(function(newValue){
+        console.log(1);
+        self.addLayer(newValue);
+        console.log(2);
+    });
+    
+    
+    self.map = null;
+    
+    
+    
+
+    return self;
+
 }
+
+
+
+
+
+
 
 
 sketchui.ItemListBlock = function(){
@@ -477,6 +615,10 @@ sketchui.ToolBar = function(){
      
      self.addDbInfo = function(){
          var db = sketchui.register.addBlock(new sketchui.DbInfoBlock(), '#blocks-canvas');
+     };
+     
+     self.addMap = function(){
+         var db = sketchui.register.addBlock(new sketchui.MapBlock(), '#blocks-canvas');
      };
  
  

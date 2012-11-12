@@ -24,6 +24,12 @@ html, body{
     -moz-border-radius: 5px;
     border-radius: 5px;
     background: white;
+    
+    margin:0 10px;
+}
+
+.block-window-button{
+    margin:2px;
 }
 .queryblock{
     max-width:500px;
@@ -40,10 +46,16 @@ html, body{
 
 .listblock{
     max-width:500px;
-    min-width:150px;
+    min-width:250px;
     max-height:500px;
     overflow: scroll;
 }
+
+.map{
+    width:500px;
+    height:400px;
+}
+.map img { max-width:none; }
 
 #map-container{
     width:100%;

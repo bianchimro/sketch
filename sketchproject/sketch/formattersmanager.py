@@ -55,15 +55,11 @@ def twitter_geojson(object):
     properties = dict()
     properties['id'] = object['id']
     
-    out =   { "type": "FeatureCollection",
-              "features": [
-                  { "type": "Feature",
+    out =     { "type": "Feature",
                      "geometry":  geom ,
                      "properties" : properties
                   }
-              ]
-            }
-
+            
     #TODO: CONSIDER GENERATORS EVERYWHERE IN FORMATTERS
     yield out
 

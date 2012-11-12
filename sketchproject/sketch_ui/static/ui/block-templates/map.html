@@ -1,4 +1,4 @@
- <div class="block listblock ui-widget-content">
+ <div class="block mapblock ui-widget-content">
      <div class="modal-header" data-bind="css: {run : !dirty(), notrun: dirty() }" >
          <button type="button" class="close block-window-button" data-bind="click: remove">×</button>
          <button type="button" class="close block-window-button" data-bind="click: maximize">O</button>
@@ -7,6 +7,14 @@
      </div>
      <div class="modal-body">        
 
+             
+             
+             <div id="map" class="map">
+             
+             </div>
+             
+             
+             <!--
              <div data-bind="foreach: results()">
          
                  <div data-bind="text: $root.fromjson($data)">
@@ -14,6 +22,7 @@
                  <hr/>
                  
              </div>
+             -->
          
      </div>
      <div class="modal-footer">
