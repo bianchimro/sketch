@@ -10,7 +10,8 @@
          
                  <div>
                      <label>Collection</label>
-                     <input type="text" data-bind="value: inputObservables['collection']"/>
+                     <select data-bind="options: availableCollections, value: inputObservables['collection']">
+                     </select>
                 </div>
                 <div>
                      <label>Query</label>

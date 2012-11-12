@@ -4,15 +4,14 @@ var sketchui = sketchui || {};
 //sketch instance global to sketchui
 sketchui.sketch = new sketchjs.Sketch("", 'sketchdb');
 
-
+/*
+    The Register holds a reference to each block
+*/
 sketchui.Register = function(){
 
     
     var self=this;
     self.blocks = [];
-    
-    
-    
     
     jsPlumb.bind("jsPlumbConnection", function(info) {
              
@@ -332,11 +331,18 @@ sketchui.QueryBlock = function(){
     
     
     //init code
+    
     self.formatters = ko.observableArray();
     sketchui.sketch.getFormattersInfo(function(response){
         self.formatters(response.results);
     
     });
+    
+    self.availableCollections = ko.observableArray();
+    sketchui.sketch.getDbInfo({}, function(response){
+               self.availableCollections(response.results);
+    });
+    
     
     
     

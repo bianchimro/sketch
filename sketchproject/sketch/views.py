@@ -75,6 +75,7 @@ def server(request):
 
 
 #gets info about a database
+#TODO: parametrize or get data collection only(no results, etc) and handle permissions
 def getDbInfo(database):
     
     
