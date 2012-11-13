@@ -290,6 +290,8 @@ sketchui.Block = function(options){
             //start : function(e,u){ jsPlumb.repaint(self.oid);},
             //drag : function(e,u){ jsPlumb.repaint(self.oid);},
             //stop : function(e,u){ jsPlumb.repaint(self.oid);}
+            
+            handle: ".modal-header"
     
         });    
 
@@ -336,7 +338,7 @@ sketchui.QueryBlock = function(){
         var dropCollection = self.results() || null;
         var formatter = self.formatterEnabled() ? inputArgs.formatter : '';
         self.dirty(true);
-        sketchui.sketch.objects({}, inputArgs.collection, { query: inputArgs.query, formatter: formatter, write_collection:true, drop_collection:dropCollection }, function(response){
+        sketchui.sketch.objects({}, inputArgs.collection, { query: inputArgs.querystring, formatter: formatter, write_collection:true, drop_collection:dropCollection }, function(response){
                context.results(response.collection_out);
                self.dirty(false);
            });
