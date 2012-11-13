@@ -1,0 +1,32 @@
+ <div class="block wordcloudblock ui-widget-content">
+     <div class="modal-header" data-bind="css: {run : !dirty(), notrun: dirty() }" >
+         <button type="button" class="close block-window-button" data-bind="click: remove">×</button>
+         <button type="button" class="close block-window-button" data-bind="click: maximize">O</button>
+         <button type="button" class="close block-window-button" data-bind="click: minimize">-</button>
+         <h4 data-bind="text: name"></h4>
+     </div>
+     <div class="modal-body" data-bind="visible: !minimized()">        
+
+             <form>
+                 <div>
+                     <label>Text field</label>
+                     <input type="text" data-bind="value: inputObservables['text_field']"/>
+                </div>
+                <div>
+                     <label>Min word length</label>
+                     <input type="text" data-bind="value: inputObservables['min_length']"/>
+                </div>
+             
+             </form>
+             
+            <svg data-bind="attr: { 'id': cloudOid }" class="cloud-diagram">
+             
+             </svg>
+             
+         
+     </div>
+     <div class="modal-footer">
+        
+     </div>
+
+ </div>

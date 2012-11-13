@@ -173,7 +173,7 @@ sketchui.Block = function(options){
     
     for(var i=0;i<self.numInputs; i++){
         var inp = self.inputs[i];
-        self.inputObservables[inp.name] = ko.observable('');
+        self.inputObservables[inp.name] = ko.observable(inp.defaultValue || '');
         
         self.inputObservables[inp.name].subscribe(function(newV){
             self.dirty(true);
@@ -412,7 +412,7 @@ sketchui.QueryBlock = function(){
     
     options.name = "query";
     options.inputs = [
-        { 'name' : 'collection', type : 'text' },
+        { 'name' : 'collection', type : 'text', connectable: true },
         { 'name' : 'querystring', type : 'textarea' },        
         { 'name' : 'formatter', type : 'text' },        
     ];
@@ -428,10 +428,19 @@ sketchui.QueryBlock = function(){
         var dropCollection = self.results() || null;
         var formatter = self.formatterEnabled() ? inputArgs.formatter : '';
         self.dirty(true);
-        sketchui.sketch.objects({}, inputArgs.collection, { query: inputArgs.querystring, formatter: formatter, write_collection:true, drop_collection:dropCollection }, function(response){
+        
+        //just skipping the query if there is not query or formatter    
+        if(!inputArgs.querystring && !formatter){
+             context.results(inputArgs.collection);   
+            self.dirty(false);
+        } else {      
+        
+            sketchui.sketch.objects({}, inputArgs.collection, { query: inputArgs.querystring, formatter: formatter, write_collection:true, drop_collection:dropCollection, limit:0 }, function(response){
                context.results(response.collection_out);
                self.dirty(false);
            });
+        }
+           
     };
     
     
@@ -654,6 +663,134 @@ sketchui.MapBlock = function(){
 
 
 
+sketchui.WordCloudBlock = function(){
+
+    var options = { className : 'WordCloudBlock' };
+    var self = this;
+    
+    options.name = "wordcloudblock";
+    options.inputs = [
+        { name : 'in_collection', type : 'collection_name', connectable: true},
+        //{ name : 'in_words', type : 'collection_name', connectable: true},
+        { name : 'text_field', type : 'text', connectable: false},
+        { name : 'min_length', type : 'text', connectable: false, defaultValue : 3},
+        
+    
+    ];
+    options.output = { name : 'results', type : 'objects_list'};
+    
+    self = new sketchui.Block(options);
+    
+    self.templateUrl = '/static/ui/block-templates/wordcloud.html';
+    
+    
+    self.inputObservables['in_collection'].subscribe(function(newValue){
+        var inputType = self.inConnectionsMeta['in_collection']['type']; 
+        if(inputType == 'collection_name'){
+            self.readRecords(newValue);
+        }
+        if(inputType == 'objects_list'){
+            self.results(newValue);
+        }
+        
+        
+    });
+    
+    
+    self.readRecords = function(collectionName){
+    
+        sketchui.sketch.objects({}, collectionName, {  }, function(response){
+               self.results(response.results);
+               self.dirty(false);
+           });
+    };
+    
+    
+    self.renderCloud = function(){
+    
+        self.dirty(true);
+        $("#"+self.cloudOid).html('');
+        
+        var fill = d3.scale.category20();
+        
+        d3.layout.cloud().size([300, 300])
+          .words(self.words().map(function(d) {
+            return {text: d, size: 10 + Math.random() * 90};
+          }))
+          .rotate(function() { return ~~(Math.random() * 2) * 90; })
+          .font("Impact")
+          .fontSize(function(d) { return d.size; })
+          .on("end", draw)
+          .start();
+
+        self.dirty(false);
+
+    
+      function draw(words) {
+        d3.select($("#"+self.cloudOid)[0])
+            .attr("width", 500)
+            .attr("height", 250)
+          .append("g")
+            .attr("transform", "translate(150,150)")
+          .selectAll("text")
+            .data(words)
+          .enter().append("text")
+            .style("font-size", function(d) { return d.size + "px"; })
+            .style("font-family", "Impact")
+            .style("fill", function(d, i) { return fill(i); })
+            .attr("text-anchor", "middle")
+            .attr("transform", function(d) {
+              return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+            })
+            .text(function(d) { return d.text; });
+      }
+        
+    
+    };
+
+
+    self.postRender = function(){
+    
+        self.renderCloud();
+    
+    };
+    
+    
+    
+    
+    self.results.subscribe(function(newValue){
+        var textField = self.inputObservables['text_field']();
+         if(!textField){
+            console.log("no text field set");
+            return
+        }
+         self.words([]);
+         for(var i=0,n=newValue.length; i<n; i++){
+            res = newValue[i];
+            text = res[textField];
+            var pieces = text.split(" ");
+            for(var j=0,m=pieces.length;j<m;j++){
+                var p = pieces[j];
+                if(p.length > parseInt(self.inputObservables['min_length']())){
+                    self.words.push(p);
+                }
+            }
+            
+        
+        }
+        self.renderCloud();
+    });
+    
+
+    self.cloudOid = "cloud"+self.oid;
+    self.words = ko.observableArray(["Hello", "world", "normally", "you", "want", "more", "words", "than", "this"]
+    );
+
+    return self;
+
+}
+
+
 
 
 
@@ -725,6 +862,11 @@ sketchui.ToolBar = function(register, canvasSelector){
      self.addMap = function(){
          var db = self.register.addBlock(new sketchui.MapBlock(), canvasSelector);
      };
+     
+     self.addWordCloud = function(){
+         var db = self.register.addBlock(new sketchui.WordCloudBlock(), canvasSelector);
+     };
+
      
      
      self.zoomOut = function(){

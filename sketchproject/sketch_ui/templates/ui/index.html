@@ -78,6 +78,9 @@
         <button class="btn btn-primary" data-bind="click: addQuery"><i class="icon-search"></i>&nbsp;Query</Button>
         <button class="btn btn-primary" data-bind="click: addList"><i class="icon-list"></i>&nbsp;List</Button>
         <button class="btn btn-primary" data-bind="click: addMap"><i class="icon-map-marker"></i>&nbsp;Map</Button>
+        <button class="btn btn-primary" data-bind="click: addWordCloud"><i class="icon-map-marker"></i>&nbsp;Word Cloud</Button>
+        
+        
         <button class="btn btn-info" data-bind="click: addDbInfo"><i class="icon-eye-open"></i>&nbsp;DB Info</Button>
         <!--
         <button class="btn btn-info" data-bind="click: zoomOut"><i class="icon-minus"></i>&nbsp;ZoomOut</Button>
@@ -165,6 +168,9 @@
 
      <script src="/static/sketch_ui/js/lib/jquery.tmpl.min.js"></script>
      <script src="/static/sketch_ui/js/lib/knockout-2.1.0.js"></script>
+     
+     <script src="/static/sketch_ui/js/lib/d3.v2.min.js"></script>
+     <script src="/static/sketch_ui/js/lib/d3.layout.cloud.js"></script>
 
      <script src="http://openlayers.org/api/OpenLayers.js"></script> 
 
@@ -177,7 +183,8 @@
         jsPlumb.ready(function(){
     
             jsPlumb.importDefaults({
-                ConnectorZIndex:200
+                ConnectorZIndex:1000,
+                ConnectionZIndex:1000,
             });
         
             sketchui.app = new sketchui.SketchApp();
