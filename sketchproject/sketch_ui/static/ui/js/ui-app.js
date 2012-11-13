@@ -6,12 +6,19 @@ sketchui.SketchApp = function(){
 
     var self = this;
 
-    /* Properties */
-
-    //the serialization name
+    
+    self.oid = ko.observable(sketchjs.generateOid());
+    self.oidProxy = ko.observable('');
+    
+    self.temporary = ko.observable(false);
+    
     self.fileName = ko.observable('');
     self.fileNameProxy = ko.observable('');
+    
     self.description = ko.observable('');
+    
+    self.saveLoopHandler = null;
+    
     
     self.availableFiles = ko.observableArray([]);
     
@@ -19,23 +26,7 @@ sketchui.SketchApp = function(){
     self.isDirty = false;
     
     
-    //map
-    //self.map = new sketchui.Map();
-    
-    //timeline
-    //self.timeline = new sketchui.Timeline();    
-    
-    //objectlist
-    //self.objectlist = ko.observableArray();
-    
-    //sketch queries
-    //self.dataLayers = ko.observableArray();
-    
-    
     self.toolbar = new sketchui.ToolBar();
-    
-    
-    
     
     
     /* Methods */
@@ -54,6 +45,12 @@ sketchui.SketchApp = function(){
     //save and load dialog show and hide
     self.saveDialog = function(){
         $('#save-dialog').modal('show');
+    };
+    
+    //#TODO: this is messy
+    self.saveDialogAs = function(){
+        $('#save-dialog').modal('show');
+        self.oidProxy('');
     };
     
     self.hideSaveDialog = function(){
@@ -95,25 +92,42 @@ sketchui.SketchApp = function(){
             return self.saveDialog();
         
         }
-        return self.saveState();
+        return self.saveState(self.hideSaveDialog);
     
     }
     
-    self.saveState = function(){
+    self.saveState = function(callback){
+    
+        if(self.fileNameProxy()){
+            self.temporary(false);
+        }
         
         $.ajax({
             url : '/ui/state/',
             type : 'POST',
             dataType : 'json',
-            data : { state_name : self.fileNameProxy(),
+            data : { 
+                     oid : self.oid(),
+                     state_name : self.fileNameProxy(),
                      description: self.description(),
-                     state : self.getState()
+                     state : self.getState(),
+                     temporary : self.temporary()
             },
             success : function(data){
                 var res = data['results'][0];
-                self.fileName(res.state_name);     
-                self.fileNameProxy(res.state_name);     
-                self.hideSaveDialog();
+                
+                self.oid(res.oid);
+                self.oidProxy(res.oid);
+                
+                if(res.state_name){
+                    console.log(res.state_name);
+                    self.fileName(res.state_name);     
+                    self.fileNameProxy(res.state_name); 
+                    self.temporary(res.temporary);
+                }
+                if (callback instanceof Function){
+                    callback();
+                }    
             
             },
             error : function(){
@@ -123,22 +137,49 @@ sketchui.SketchApp = function(){
         });
     };
     
+    
+    self.saveAndHideDialog = function(){ 
+        self.stopSaveLoop();
+        self.saveState(self.hideSaveDialog);
+        self.startSaveLoop();
+    }
+    
+    self.loadAndHideDialog = function(){
+        
+        self.stopSaveLoop();
+        self.loadState(self.hideLoadDialog);
+        self.startSaveLoop();
+        
+    };
+    
+    
+    
     //state loading
-    self.loadState = function(){
+    self.loadState = function(callback){
         
         $.ajax({
             url : '/ui/state/',
             type : 'GET',
             dataType : 'json',
-            data : { state_name : self.fileNameProxy(),
+            data : { oid : self.oidProxy(),
                     
-            },
+                },
+                
             success : function(data){
+            
                 var res = data['results'][0];
                 self.fileName(res.state_name);
+                self.oid(res.oid);
+                self.oidProxy(res.oid);
+                
                 self.fileNameProxy(res.state_name);
                 self.description(res.description)
                 self.setState(res.state);
+                self.temporary(res.temporary);
+                if (callback instanceof Function){
+                    callback();
+                } 
+                //move to callback
                 self.hideLoadDialog();
             
             },
@@ -157,7 +198,35 @@ sketchui.SketchApp = function(){
     //shortcut to set setFilenameProxy from an InterfaceState obj
     self.setFilenameProxy = function(obj){
         self.fileNameProxy(obj.state_name);
+        self.oidProxy(obj.oid);
     };
+    
+    
+    
+    self.startSaveLoop = function(){
+        if(!self.saveLoopHandler){
+            self.saveLoopHandler = setInterval(self.saveState, 14000);
+        }
+    
+    };
+    
+    self.stopSaveLoop = function(){
+        if(self.saveLoopHandler){
+            window.clearInterval(self.saveLoopHandler);
+            self.saveLoopHandler = null;
+        }
+    };
+    
+    
+    self.init = function(){
+        
+        self.startSaveLoop();
+    
+    };
+    
+    
+    /* init code */
+    self.init();
 
 
 

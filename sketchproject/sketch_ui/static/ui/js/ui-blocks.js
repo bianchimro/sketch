@@ -11,7 +11,7 @@ sketchui.Register = function(){
 
     
     var self=this;
-    self.blocks = [];
+    self.blocks = {};
     
     jsPlumb.bind("jsPlumbConnection", function(info) {
              
@@ -61,13 +61,28 @@ sketchui.Register = function(){
 
     self.removeBlock = function(blo){
     
-        ko.cleanNode($(blo.selector)[0]);
+        ko.cleanNode(blo.containerElement);
         blo.destroy();
         delete self.blocks[blo.oid];
-        jsPlumb.removeAllEndpoints($(blo.selector)[0]);
+        jsPlumb.removeAllEndpoints(blo.containerElement);
         $(blo.selector).remove();
     
     };
+    
+    
+    self.serialize = function(){
+    
+        var out = { blocks: {}};
+        
+        for(var o in self.blocks){
+            
+            out.blocks[o] = self.blocks[o].serialize();
+        }
+        return out;
+        
+    };
+    
+
 
 
 
@@ -89,6 +104,7 @@ sketchui.Block = function(options){
     
     self.connectorId = "connector-" + self.oid;
     self.selector = "#"+self.oid;
+    self.containerElement = null;
     
     self.dirty = ko.observable(true);
     
@@ -138,7 +154,8 @@ sketchui.Block = function(options){
         jTemplate.attr("id", self.oid);
         
         $(containerSelector).append(jTemplate);
-        ko.applyBindings(self, $(self.selector)[0]);
+        self.containerElement = $(self.selector)[0];
+        ko.applyBindings(self, self.containerElement);
         if(self.postRender instanceof Function){
             self.postRender();
         }
@@ -146,6 +163,9 @@ sketchui.Block = function(options){
         self.generateOutEndpoints();
         self.generateInEndpoints();
         self.setDraggable();
+        
+        
+
 
         return self;
     
@@ -248,7 +268,7 @@ sketchui.Block = function(options){
        
        var output = self.output;
        var opts = { anchor:"BottomCenter", label:output.name };
-       self.outEndpoints[output.name] = jsPlumb.addEndpoint($(self.selector),  opts, sourceEndpoint);
+       self.outEndpoints[output.name] = jsPlumb.addEndpoint(self.containerElement,  opts, sourceEndpoint);
        
     
     };
@@ -276,7 +296,7 @@ sketchui.Block = function(options){
                 continue;
             }
             var opts = { anchors:"TopCenter", label:inp.name };
-            self.inEndpoints[inp.name] = jsPlumb.addEndpoint($(self.selector),  opts, targetEndpoint);
+            self.inEndpoints[inp.name] = jsPlumb.addEndpoint(self.containerElement,  opts, targetEndpoint);
             
             
         }
@@ -308,6 +328,19 @@ sketchui.Block = function(options){
         console.log("whe should dispose all notifications here ... and also remove all connections");
     
     };
+    
+    
+    self.serialize = function(){
+    
+        return self.oid;
+        
+    }
+    
+    
+    
+    
+    
+    
     
     return self;
     

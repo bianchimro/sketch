@@ -33,7 +33,7 @@
               <li><a data-bind="click: loadDialog">Load session...</a></li>
               <li class="divider"></li>
               <li><a data-bind="click: saveCurrent, css: { muted: fileName() == ''}">Save session</a></li>
-              <li><a data-bind="click: saveDialog">Save session as...</a></li>
+              <li><a data-bind="click: saveDialogAs">Save session as...</a></li>
             </ul>
           </li>
            
@@ -102,7 +102,7 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn" data-bind="click: saveState">Save</button>
+            <button class="btn" data-bind="click: saveAndHideDialog">Save</button>
             <button class="btn" data-bind="click: hideSaveDialog">Cancel</button>
         </div>
     </div>
@@ -117,6 +117,8 @@
             <form>
                 <label>Filename</label>
                 <input type="text" data-bind="value: fileNameProxy" disabled="disabled"/>
+                <input type="text" data-bind="value: oidProxy" disabled="disabled"/>
+                
                 <!--<select data-bind="value: fileName, options: availableFiles"></select>-->
                 <div data-bind="foreach: availableFiles">
                     <div class="rowdiv" data-bind="click: $root.setFilenameProxy">
@@ -133,7 +135,7 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button class="btn" data-bind="click: loadState">Load</button>
+            <button class="btn" data-bind="click: loadAndHideDialog">Load</button>
             <button class="btn" data-bind="click: hideLoadDialog">Cancel</button>
         </div>
     </div>

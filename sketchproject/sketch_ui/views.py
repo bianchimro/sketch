@@ -43,39 +43,40 @@ def ui_state(request):
     out = createBaseResponseObject()
     
     if request.POST:
+        oid = request.POST.get('oid', None)
         state_name = request.POST.get('state_name', None)
-        if not state_name:
-            out['errors'].append("You must query a state name")
-            out['status'] = 0
-        else:
-            state = request.POST.get('state', '')
-            description = request.POST.get('description', '')
-            
+        description = request.POST.get('description', None)
+        state = request.POST.get('state', None)
+        
+        try:
+            obj = InterfaceState.objects.get(oid=oid, user=request.user)
+            if description:
+                obj.description = description
+            if name:
+                obj.state_name = state_name
+                
+            obj.state = state
+            obj.save()
+            out['results'].append(instanceDict(obj))   
+        except:
+            obj = InterfaceState(state_name = state_name, user=request.user, state=state, 
+                                  description=description, oid=oid)
             try:
-                obj = InterfaceState.objects.get(state_name=state_name, user=request.user)
-                obj.state = state
                 obj.save()
-                out['results'].append(instanceDict(obj))   
-            except:
-                obj = InterfaceState(state_name = state_name, user=request.user, state=state, 
-                                      description=description)
-                try:
-                    obj.save()
-                    out['results'].append(instanceDict(obj))                    
-                except Exception, e:
-                    out['errors'].append(str(e))
-                    out['status'] = 0
+                out['results'].append(instanceDict(obj))                    
+            except Exception, e:
+                out['errors'].append(str(e))
+                out['status'] = 0
             
     else:
-        state_name = request.GET.get('state_name', None)
-    #if request.GET:
-        state_name = request.GET.get('state_name', None)
-        if not state_name:
-            out['errors'].append("You must query a state name")
+
+        oid = request.GET.get('oid', None)
+        if not oid:
+            out['errors'].append("You must query a state oid")
             out['status'] = 0
         else:
             try:
-                obj = InterfaceState.objects.get(state_name=state_name, user=request.user)
+                obj = InterfaceState.objects.get(oid=oid, user=request.user)
                 out['results'].append(instanceDict(obj))
             except Exception, e:
                 out['errors'].append(str(e))
