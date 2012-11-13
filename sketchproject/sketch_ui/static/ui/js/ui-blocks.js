@@ -208,13 +208,13 @@ sketchui.Block = function(options){
     
     
     self.minimize = function(){
-        jsPlumb.repaint(self.oid);
         self.minimized(true);
+        jsPlumb.repaint(self.oid);
     };
     
     self.maximize = function(){
-        jsPlumb.repaint(self.oid);
         self.minimized(false);
+        jsPlumb.repaint(self.oid);
     };
 
     
@@ -378,7 +378,7 @@ sketchui.Block = function(options){
         out.obj.inConnectionsMeta = self.inConnectionsMeta;
         
         
-        out.obj.results = self.results();
+        //out.obj.results = self.results();
         out.obj.dirty = self.dirty();
         
         out.view.offset = $(self.selector).offset();
