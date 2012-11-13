@@ -70,6 +70,7 @@ def getLimit(request, var_name='limit'):
     limit = request.GET.get(var_name) or request.POST.get(var_name)
     try:
         obj = int(limit)
+        return limit;
         return min(obj, settings.DEFAULT_QUERY_LIMIT)
     except:
         return settings.DEFAULT_QUERY_LIMIT    

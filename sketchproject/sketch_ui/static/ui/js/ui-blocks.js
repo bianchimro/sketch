@@ -435,7 +435,7 @@ sketchui.QueryBlock = function(){
             self.dirty(false);
         } else {      
         
-            sketchui.sketch.objects({}, inputArgs.collection, { query: inputArgs.querystring, formatter: formatter, write_collection:true, drop_collection:dropCollection, limit:0 }, function(response){
+            sketchui.sketch.objects({}, inputArgs.collection, { query: inputArgs.querystring, formatter: formatter, write_collection:true, drop_collection:dropCollection, limit:1000 }, function(response){
                context.results(response.collection_out);
                self.dirty(false);
            });

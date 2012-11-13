@@ -268,7 +268,7 @@ def objects(request, collection, database=None):
         
         
         drop_collection = request.GET.get('drop_collection', None)
-        if drop_collection:
+        if drop_collection and drop_collection.startswith('results'):
             mongo.dropCollection(database, drop_collection)
         
         query_result = mongo.objects(database, collection, query_dict=query_dict, offset=offset, limit=limit, 
