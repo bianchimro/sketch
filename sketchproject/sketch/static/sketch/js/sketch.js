@@ -87,7 +87,8 @@ sketchjs.Sketch.prototype.getDbInfo = function(options, successCallback){
         type: 'GET',
         url: url,
         success: successCallback,
-        dataType: 'json'
+        dataType: 'json',
+        cache: false
     });   
     
 };
