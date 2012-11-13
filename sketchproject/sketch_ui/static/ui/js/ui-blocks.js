@@ -707,6 +707,10 @@ sketchui.WordCloudBlock = function(){
     
     
     self.renderCloud = function(){
+        
+        if(!self.words().length){
+            return;
+        }
     
         self.dirty(true);
         $("#"+self.cloudOid).html('');
