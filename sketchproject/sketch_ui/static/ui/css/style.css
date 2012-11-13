@@ -1,5 +1,6 @@
-html, body{
+ body{
     height: 100%;
+    
 }
 
 .rowdiv{
@@ -59,7 +60,19 @@ html, body{
 
 
 
-.blocks-canvas{ border-top: solid #ccc 2px;}
+#blocks-canvas{ 
+    background-image: url('../img/old_mathematics.png');
+    background-repeat:repeat;
+    min-height:1000px;
+/*
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+*/
+}
 
 
 
