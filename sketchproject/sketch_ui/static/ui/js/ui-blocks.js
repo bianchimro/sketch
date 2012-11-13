@@ -138,10 +138,11 @@ sketchui.Block = function(options){
         jTemplate.attr("id", self.oid);
         
         $(containerSelector).append(jTemplate);
+        ko.applyBindings(self, $(self.selector)[0]);
         if(self.postRender instanceof Function){
             self.postRender();
         }
-        ko.applyBindings(self, $(self.selector)[0]);
+        
         self.generateOutEndpoints();
         self.generateInEndpoints();
         self.setDraggable();
@@ -235,7 +236,7 @@ sketchui.Block = function(options){
            paintStyle:{ fillStyle:sourceColor},
            isSource: true,
            connectorStyle:{ strokeStyle:sourceColor, lineWidth:5 },
-           connector: ["Bezier"],
+           connector: ["Flowchart"],
            overlays: [
 	        	[ "Arrow", { foldback:0.2 } ],
 	        	[ "Label", { cssClass:"labelClass" } ]	
@@ -256,13 +257,13 @@ sketchui.Block = function(options){
     self.generateInEndpoints = function(){
     
         
-       var targetColor = "red";
+       var targetColor = "#bbbddd";
        var targetEndpoint = {
            endpoint:["Dot", { radius:16 }],
            paintStyle:{ fillStyle:targetColor},
            isTarget:true,
            connectorStyle:{ },
-           connector: ["Bezier", { curviness:63 } ],
+           connector: ["FlowChart", { curviness:63 } ],
            maxConnections:1,
            connectionsDetachable : true
            //isTarget:true,
@@ -487,7 +488,7 @@ sketchui.MapBlock = function(){
     
     self.postRender = function(){
 
-            self.map = new OpenLayers.Map('map');
+            self.map = new OpenLayers.Map(self.mapOid);
             var osm = new OpenLayers.Layer.OSM();
             self.map.addLayer(osm);
             
@@ -506,7 +507,19 @@ sketchui.MapBlock = function(){
             map.addLayer(geojson_layer);        
             map.setCenter(new OpenLayers.LonLat(11000, 45000),10);
             */
-            self.map.zoomToMaxExtent();            
+            self.map.zoomToMaxExtent();    
+            
+            /*
+            $(self.selector).resizable({
+                resize : function(e,u){ 
+                    jsPlumb.repaint(self.oid);
+                    
+                },
+                
+                alsoResize: $("#"+self.mapOid)
+            
+            });        
+            */
     
     };
     
@@ -533,14 +546,12 @@ sketchui.MapBlock = function(){
     
     
     self.results.subscribe(function(newValue){
-        console.log(1);
         self.addLayer(newValue);
-        console.log(2);
     });
     
     
     self.map = null;
-    
+    self.mapOid = "map"+self.oid;
     
     
 

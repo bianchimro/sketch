@@ -20,16 +20,20 @@ sketchui.SketchApp = function(){
     
     
     //map
-    self.map = new sketchui.Map();
+    //self.map = new sketchui.Map();
     
     //timeline
-    self.timeline = new sketchui.Timeline();    
+    //self.timeline = new sketchui.Timeline();    
     
     //objectlist
-    self.objectlist = ko.observableArray();
+    //self.objectlist = ko.observableArray();
     
     //sketch queries
-    self.dataLayers = ko.observableArray();
+    //self.dataLayers = ko.observableArray();
+    
+    
+    self.toolbar = new sketchui.ToolBar();
+    
     
     
     

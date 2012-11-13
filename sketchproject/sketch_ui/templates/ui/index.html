@@ -2,6 +2,8 @@
 
 {% block extra_head %}
     <link rel="stylesheet" href="/static/ui/css/style.css"/>
+    
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css" />
 {% endblock %}
 
 {% block nav %}
@@ -10,9 +12,52 @@
     
 {% endblock %}
 
+
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+      <a class="brand" href="#">Urbansketching</a>
+      <div class="nav-collapse">
+          {% if user.is_authenticated %}
+          <ul class="nav pull-left">
+           <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              File
+              <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a data-bind="click: newState">New session</a></li>
+              <li class="divider"></li>
+              <li><a data-bind="click: loadDialog">Load session...</a></li>
+              <li class="divider"></li>
+              <li><a data-bind="click: saveCurrent, css: { muted: fileName() == ''}">Save session</a></li>
+              <li><a data-bind="click: saveDialog">Save session as...</a></li>
+            </ul>
+          </li>
+           
+          </ul>
+          
+          <ul class="nav pull-right">
+              <li><p class="navbar-text">Welcome {{ user }} &nbsp;</p></li>
+            <li>
+              <form class="navbar-form" method="get" action="/logout/">
+                  <input class="btn" type="submit" name="logout-button" value="Log me out"/>
+              </form>
+            </li>
+          </ul>
+          {% endif %}
+      </div><!--/.nav-collapse -->          
+    </div>
+  </div>
+</div>
+
+
+
 {% block content_centered %}
    
-    <div id="appstate-descriptor">
+    <div id="appstate-descriptor" class="">
         <table class="table">
             <tr>
                 <td>File name:</td>
@@ -25,6 +70,22 @@
 
         </table>
     </div>
+    
+    <div class="navbar">
+    <div class="navbar-inner">
+    <div class="container">
+    <div id="blocks-toolbar" data-bind="with: toolbar">
+        <button class="btn btn-primary" data-bind="click: addQuery"><i class="icon-search"></i>&nbsp;Query</Button>
+        <button class="btn btn-primary" data-bind="click: addList"><i class="icon-list"></i>&nbsp;List</Button>
+        <button class="btn btn-primary" data-bind="click: addMap"><i class="icon-map-marker"></i>&nbsp;Map</Button>
+        <button class="btn btn-info" data-bind="click: addDbInfo"><i class="icon-eye-open"></i>&nbsp;DB Info</Button>
+
+        <button class="btn btn-info pull-right" data-bind="click: function(){$('#appstate-descriptor').toggle();}"><i class="icon-eye-open"></i>&nbsp;Session Info</Button>
+        
+    </div>
+     </div>
+  </div>
+</div>
 
     
     <!-- to be moved to a modal dialog -->
@@ -77,38 +138,42 @@
         </div>
     </div>
     
-
-
-    <div id="map-container" data-bind="with: map">
-    </div>
-    
-    <div id="list-container" data-bind="with: objectlist">
-    </div>
-
-    
-    
 {% endblock %}
 
 {% block content_wide %}
 
-        <div id="timeline-container" data-bind="with: timeline">
-        </div>
+    
+    <div id="blocks-canvas">
+    </div>    
 
+        
 
 {% endblock %}
 
 
 {% block js_body %}
+    <script src="/static/sketch_ui/js/lib/jquery-ui.js"></script>
+    <script src="/static/ui/jsPlumb/jquery.jsPlumb-1.3.16-all-min.js"></script>    
     
      <script src="/static/sketch/js/sketch.js"></script>
+
      <script src="/static/sketch_ui/js/lib/jquery.tmpl.min.js"></script>
      <script src="/static/sketch_ui/js/lib/knockout-2.1.0.js"></script>
-     <script src="/static/ui/js/ui-map.js"></script>
-     <script src="/static/ui/js/ui-timeline.js"></script>
+
+     <script src="http://openlayers.org/api/OpenLayers.js"></script> 
+
      <script src="/static/ui/js/ui-app.js"></script>
+     <script src="/static/ui/js/ui-blocks.js"></script>
+     
+     
      <script>
      
-        $(document).ready(function(){
+        jsPlumb.ready(function(){
+    
+            jsPlumb.importDefaults({
+                ConnectorZIndex:200
+            });
+        
             sketchui.app = new sketchui.SketchApp();
             ko.applyBindings(sketchui.app);
         });
