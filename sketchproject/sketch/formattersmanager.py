@@ -34,7 +34,7 @@ def foursquare_geojson(object):
     out =   { "type": "FeatureCollection",
               "features": [
                   { "type": "Feature",
-                     "geometry": {"type": "Point", "coordinates": [loc['lat'], loc['lng']] },
+                     "geometry": {"type": "Point", "coordinates": [loc['lng'], loc['lat']] },
                      "properties" : properties
                   }
               ]
