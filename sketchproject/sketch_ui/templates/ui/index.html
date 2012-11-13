@@ -80,6 +80,8 @@
         <button class="btn btn-primary" data-bind="click: addMap"><i class="icon-map-marker"></i>&nbsp;Map</Button>
         <button class="btn btn-info" data-bind="click: addDbInfo"><i class="icon-eye-open"></i>&nbsp;DB Info</Button>
 
+        <button class="btn btn-info" data-bind="click: zoomOut"><i class="icon-minus"></i>&nbsp;ZoomOut</Button>
+
         <button class="btn btn-info pull-right" data-bind="click: function(){$('#appstate-descriptor').toggle();}"><i class="icon-eye-open"></i>&nbsp;Session Info</Button>
         
     </div>
@@ -155,6 +157,8 @@
 
 {% block js_body %}
     <script src="/static/sketch_ui/js/lib/jquery-ui.js"></script>
+    <!--<script src="/static/sketch_ui/js/lib/jquery.zoomooz.min.js"></script>-->
+    
     <script src="/static/ui/jsPlumb/jquery.jsPlumb-1.3.16-all-min.js"></script>    
     
      <script src="/static/sketch/js/sketch.js"></script>

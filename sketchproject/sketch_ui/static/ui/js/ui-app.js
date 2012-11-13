@@ -8,7 +8,7 @@ sketchui.SketchApp = function(){
 
     
     self.oid = ko.observable(sketchjs.generateOid());
-    self.oidProxy = ko.observable('');
+    self.oidProxy = ko.observable(self.oid);
     
     self.temporary = ko.observable(false);
     
@@ -26,19 +26,24 @@ sketchui.SketchApp = function(){
     self.isDirty = false;
     
     
-    self.toolbar = new sketchui.ToolBar();
-    
+    self.register  = new sketchui.Register({containerSelector : "#blocks-canvas" });
+    self.toolbar = new sketchui.ToolBar(self.register, "#blocks-canvas");
     
     /* Methods */
     
     
     //state getter and setter
     self.getState = function(){
-        var s = {'test':'state'};
+        var s = self.register.serialize();
         return JSON.stringify(s);
     };
     
     self.setState = function(state){
+
+        self.register.resetBlocks();
+        self.register.deserialize(state);
+        //a good idea here would be destroying and re-instantiating the register;
+        
     
     };
     
@@ -50,7 +55,7 @@ sketchui.SketchApp = function(){
     //#TODO: this is messy
     self.saveDialogAs = function(){
         $('#save-dialog').modal('show');
-        self.oidProxy('');
+        self.oidProxy(sketch.generateOid());
     };
     
     self.hideSaveDialog = function(){
@@ -107,7 +112,7 @@ sketchui.SketchApp = function(){
             type : 'POST',
             dataType : 'json',
             data : { 
-                     oid : self.oid(),
+                     oid : self.oidProxy(),
                      state_name : self.fileNameProxy(),
                      description: self.description(),
                      state : self.getState(),
@@ -120,7 +125,6 @@ sketchui.SketchApp = function(){
                 self.oidProxy(res.oid);
                 
                 if(res.state_name){
-                    console.log(res.state_name);
                     self.fileName(res.state_name);     
                     self.fileNameProxy(res.state_name); 
                     self.temporary(res.temporary);
@@ -166,8 +170,9 @@ sketchui.SketchApp = function(){
                 },
                 
             success : function(data){
-            
+
                 var res = data['results'][0];
+                console.log(res);
                 self.fileName(res.state_name);
                 self.oid(res.oid);
                 self.oidProxy(res.oid);
@@ -176,6 +181,7 @@ sketchui.SketchApp = function(){
                 self.description(res.description)
                 self.setState(res.state);
                 self.temporary(res.temporary);
+                
                 if (callback instanceof Function){
                     callback();
                 } 
@@ -191,7 +197,12 @@ sketchui.SketchApp = function(){
     
     //new state
     self.newState = function(){
-    
+        self.setState({});
+        self.oid(sketchjs.generateOid());
+        self.oidProxy(self.oid());
+        self.fileNameProxy('');
+        self.fileName('');
+        self.description('');
     };
     
     

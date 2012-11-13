@@ -7,11 +7,13 @@ sketchui.sketch = new sketchjs.Sketch("", 'sketchdb');
 /*
     The Register holds a reference to each block
 */
-sketchui.Register = function(){
+sketchui.Register = function(options){
 
-    
+    options = options || {};
+
     var self=this;
     self.blocks = {};
+    self.containerSelector = options.containerSelector || null;
     
     jsPlumb.bind("jsPlumbConnection", function(info) {
              
@@ -51,7 +53,7 @@ sketchui.Register = function(){
     
     
     self.addBlock = function(blo, containerSelector){
-
+        containerSelector = containerSelector || self.containerSelector;
         blo = blo.renderInContainer(containerSelector);
         self.blocks[blo.oid] = blo;
         blo.register = self;
@@ -69,6 +71,14 @@ sketchui.Register = function(){
     
     };
     
+    self.resetBlocks = function(){
+        for(var o in self.blocks){
+            
+            self.removeBlock(self.blocks[o]);
+        }
+    
+    };
+    
     
     self.serialize = function(){
     
@@ -82,16 +92,42 @@ sketchui.Register = function(){
         
     };
     
+    
+    self.deserialize = function(serializedState){
+        
+        for(x in serializedState.blocks){
+            var data = serializedState.blocks[x];
+            self.deserializeBlock(data);
+        
+        }
+    
+    };
+    
+    self.deserializeBlock = function(data){
+        console.log(data);
+        
+        var obj = data.obj;
+        var constructor = sketchui[obj.className];
+        var block = new constructor();
+        
+        block.dirty(obj.dirty);
+        block.minimized(data.view.minimized);
+                
+        self.addBlock(block, self.containerSelector);
+        
+        $(block.selector).offset(data.view.offset);
+
+        
+        jsPlumb.repaint(block.oid);
+        
+    
+    };
+    
 
 
 
 
 };
-
-
-//#todo: ensure singleton
-sketchui.register = new sketchui.Register();
-
 
 
 
@@ -112,6 +148,7 @@ sketchui.Block = function(options){
     self.inputs = options.inputs;
     self.output = options.output;
     
+    self.className = options.className || 'Block';
 
     self.numInputs = self.inputs.length;
     self.processor = options.processor;
@@ -121,6 +158,7 @@ sketchui.Block = function(options){
     
     
     self.template = ko.observable("");
+    self.minimized = ko.observable(options.minimized || false);
     
     self.inEndpoints = {};
     self.outEndpoints = {};
@@ -131,7 +169,7 @@ sketchui.Block = function(options){
     self.outConnections = {};
     
     self.inputObservables = {};
-    self.inputMeta = {}
+    self.inputMeta = {};
     
     for(var i=0;i<self.numInputs; i++){
         var inp = self.inputs[i];
@@ -164,30 +202,21 @@ sketchui.Block = function(options){
         self.generateInEndpoints();
         self.setDraggable();
         
-        
-
-
         return self;
     
     };
     
     
     self.minimize = function(){
-        $('.modal-body', self.selector).hide();
-        $('.modal-footer', self.selector).hide();
         jsPlumb.repaint(self.oid);
+        self.minimized(true);
     };
     
     self.maximize = function(){
-        $('.modal-body', self.selector).show();
-        $('.modal-footer', self.selector).show();
         jsPlumb.repaint(self.oid);
-    }
+        self.minimized(false);
+    };
 
-    
-    
-    
-    
     
     self.inputsArgs = ko.computed(
         
@@ -332,14 +361,42 @@ sketchui.Block = function(options){
     
     self.serialize = function(){
     
-        return self.oid;
+        
+        var out = {
+            obj : {},
+            view : {}
+            
+        
+        };
+        
+        out.obj.oid = self.oid;
+        //serialize classes
+        out.obj.className = self.className;
+        out.obj.inputs = self.inputs;
+        out.obj.output = self.output;
+        
+        out.obj.inConnectionsMeta = self.inConnectionsMeta;
+        
+        
+        out.obj.results = self.results();
+        out.obj.dirty = self.dirty();
+        
+        out.view.offset = $(self.selector).offset();
+        out.view.minimized = self.minimized();
+        return out;
+        
+        
+        
         
     }
     
     
     
+    //garbage collection
+    self.getReferencedCollections = function(){
     
     
+    };
     
     
     return self;
@@ -350,7 +407,7 @@ sketchui.Block = function(options){
 
 sketchui.QueryBlock = function(){
 
-    var options = {};
+    var options = { className : 'QueryBlock'};
     var self = this;
     
     options.name = "query";
@@ -417,7 +474,7 @@ sketchui.QueryBlock = function(){
 
 sketchui.DbInfoBlock = function(){
 
-    var options = {};
+    var options = { className : 'DbInfoBlock' };
     var self = this;
     
     options.name = "dbinfo";
@@ -445,7 +502,7 @@ sketchui.DbInfoBlock = function(){
 
 sketchui.ListBlock = function(){
 
-    var options = {};
+    var options = { className : 'ListBlock' };
     var self = this;
     
     options.name = "listblock";
@@ -487,7 +544,7 @@ sketchui.ListBlock = function(){
 
 sketchui.MapBlock = function(){
 
-    var options = {};
+    var options = { className : 'MapBlock' };
     var self = this;
     
     options.name = "mapblock";
@@ -603,7 +660,7 @@ sketchui.MapBlock = function(){
 
 sketchui.ItemListBlock = function(){
 
-    var options = {};
+    var options = { className : 'ItemListBlock' };
     var self = this;
     
     
@@ -645,26 +702,34 @@ sketchui.ItemListBlock = function(){
 
 
 
-sketchui.ToolBar = function(){
- 
+sketchui.ToolBar = function(register, canvasSelector){
+    
      var self=this;
+     self.register = register;
+     
      self.addQuery = function(){
-         var qb = sketchui.register.addBlock(new sketchui.QueryBlock(), '#blocks-canvas');       
+         var qb = self.register.addBlock(new sketchui.QueryBlock(), canvasSelector);       
      };
      self.addList = function(){
-         var li = sketchui.register.addBlock(new sketchui.ListBlock(), '#blocks-canvas');
+         var li = self.register.addBlock(new sketchui.ListBlock(), canvasSelector);
      };
      
       self.addItemList = function(){
-         var db = sketchui.register.addBlock(new sketchui.ItemListBlock(), '#blocks-canvas');
+         var db = self.register.addBlock(new sketchui.ItemListBlock(), canvasSelector);
      };
      
      self.addDbInfo = function(){
-         var db = sketchui.register.addBlock(new sketchui.DbInfoBlock(), '#blocks-canvas');
+         var db = self.register.addBlock(new sketchui.DbInfoBlock(), canvasSelector);
      };
      
      self.addMap = function(){
-         var db = sketchui.register.addBlock(new sketchui.MapBlock(), '#blocks-canvas');
+         var db = self.register.addBlock(new sketchui.MapBlock(), canvasSelector);
+     };
+     
+     
+     self.zoomOut = function(){
+        //not working yet;
+     
      };
  
  
