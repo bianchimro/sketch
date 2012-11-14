@@ -64,7 +64,7 @@
     background-image: url('../backgrounds/old_mathematics.png');
     background-repeat:repeat;
     min-height:1000px;
-     background-attachment: fixed;
+    background-attachment: fixed;
 /*
 -webkit-touch-callout: none;
 -webkit-user-select: none;
