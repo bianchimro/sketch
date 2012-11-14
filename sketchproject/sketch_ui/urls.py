@@ -12,6 +12,7 @@ urlpatterns = patterns('sketch_ui.views',
     url(r'ui/states/$', 'ui_states', name="ui_states"),
     
     url(r'ui/testblock/$', direct_to_template, {'template': 'ui/testblock.html'}),
+    url(r'ui/backgrounds/$', 'ui_backgrounds', name="ui_backgrounds"),
     
     
 )

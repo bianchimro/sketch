@@ -1,5 +1,7 @@
 import json
 import bson.json_util
+import os
+from django.conf import settings
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, render_to_response
@@ -96,3 +98,16 @@ def ui_states(request):
     
     return HttpResponse(json.dumps(out))
     
+    
+def ui_backgrounds(request):
+    """
+    Lists all available backgrounds
+    """
+    out = createBaseResponseObject()    
+    path = os.path.join(settings.BASE_PATH , "sketch_ui/static/ui/backgrounds")
+    files = os.listdir(path)
+    for f in files:
+        el = { 'filename' : f, 'filepath' : "/static/ui/backgrounds/" + f}
+        out['results'].append(el)
+    
+    return HttpResponse(json.dumps(out))

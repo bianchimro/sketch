@@ -29,6 +29,31 @@ sketchui.SketchApp = function(){
     self.register  = new sketchui.Register({containerSelector : "#blocks-canvas" });
     self.toolbar = new sketchui.ToolBar(self.register, "#blocks-canvas");
     
+    //inteface options
+    self.uiOptions = {};
+    self.uiOptions.canvasBackgrounds = ko.observableArray([]);
+    var currentBackground = { filename : 'old_mathematics.png',  filepath : "static/ui/backgrounds/old_mathematics.png"}
+    self.uiOptions.canvasBackground = ko.observable(currentBackground.filepath);
+    
+    console.log(currentBackground);
+    
+    
+    self.uiOptions.canvasBackground.subscribe(function(newValue){
+        console.log(newValue);
+        $("#blocks-canvas").css('background-image', "url('" +newValue + "')");
+    });
+    
+    $.ajax({
+            url : '/ui/backgrounds/',
+            type : 'get',
+            dataType : 'json',
+            success : function(data){
+                self.uiOptions.canvasBackgrounds(data['results']);
+            }
+        
+        });
+    
+    
     /* Methods */
     
     

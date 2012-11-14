@@ -71,25 +71,26 @@
     </div>
     
     <div class="navbar">
-    <div class="navbar-inner">
-    <div class="container">
-    <div id="blocks-toolbar" data-bind="with: toolbar">
-        <button class="btn btn-primary" data-bind="click: addQuery"><i class="icon-search"></i>&nbsp;Query</Button>
-        <button class="btn btn-primary" data-bind="click: addList"><i class="icon-list"></i>&nbsp;List</Button>
-        <button class="btn btn-primary" data-bind="click: addMap"><i class="icon-map-marker"></i>&nbsp;Map</Button>
-        <button class="btn btn-primary" data-bind="click: addWordCloud"><i class="icon-map-marker"></i>&nbsp;Word Cloud</Button>
+        <div class="navbar-inner">
+            <div class="container">
+                <div id="blocks-toolbar" data-bind="with: toolbar">
+                    <button class="btn btn-primary" data-bind="click: addQuery"><i class="icon-search"></i>&nbsp;Query</Button>
+                    <button class="btn btn-primary" data-bind="click: addList"><i class="icon-list"></i>&nbsp;List</Button>
+                    <button class="btn btn-primary" data-bind="click: addMap"><i class="icon-map-marker"></i>&nbsp;Map</Button>
+                    <button class="btn btn-primary" data-bind="click: addWordCloud"><i class="icon-map-marker"></i>&nbsp;Word Cloud</Button>
         
         
-        <button class="btn btn-info" data-bind="click: addDbInfo"><i class="icon-eye-open"></i>&nbsp;DB Info</Button>
-        <!--
-        <button class="btn btn-info" data-bind="click: zoomOut"><i class="icon-minus"></i>&nbsp;ZoomOut</Button>
-        -->
-        <button class="btn btn-info pull-right" data-bind="click: function(){$('#appstate-descriptor').toggle();}"><i class="icon-eye-open"></i>&nbsp;Session Info</Button>
+                    <button class="btn btn-info" data-bind="click: addDbInfo"><i class="icon-eye-open"></i>&nbsp;DB Info</Button>
+                    <!--
+                    <button class="btn btn-info" data-bind="click: zoomOut"><i class="icon-minus"></i>&nbsp;ZoomOut</Button>
+                    -->
+                    <button class="btn btn-info pull-right" data-bind="click: function(){$('#appstate-descriptor').toggle();}"><i class="icon-eye-open"></i>&nbsp;Session Info</Button>
         
+                </div>
+             </div>
+             
+        </div>
     </div>
-     </div>
-  </div>
-</div>
 
     
     <!-- to be moved to a modal dialog -->
@@ -151,7 +152,15 @@
     
     <div id="blocks-canvas">
     </div>    
-
+    
+    <div class="container">
+    <form class="form-inline">
+        <label class="select">
+            Change background
+        </label>
+        <select data-bind="value: $root.uiOptions.canvasBackground, options: $root.uiOptions.canvasBackgrounds, optionsText: 'filename', optionsValue: 'filepath'" ></select>
+    </form>
+    </div>
         
 
 {% endblock %}
