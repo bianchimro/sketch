@@ -109,6 +109,7 @@ sketchui.SketchApp = function(){
             url : '/ui/states/',
             type : 'get',
             dataType : 'json',
+            cache : false,
             success : function(data){
                 self.availableFiles(data['results']);
                 if(callback instanceof Function){
@@ -245,7 +246,7 @@ sketchui.SketchApp = function(){
     
     self.startSaveLoop = function(){
         if(!self.saveLoopHandler){
-            self.saveLoopHandler = setInterval(self.saveState, 14000);
+            self.saveLoopHandler = setInterval(self.saveState, 10000);
         }
     
     };

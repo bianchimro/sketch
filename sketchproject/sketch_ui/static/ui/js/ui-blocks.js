@@ -23,14 +23,15 @@ sketchui.Register = function(options){
             var sourceLabel = info.sourceEndpoint.getLabel();
             var targetBlock = self.blocks[info.targetId];
             
+            targetBlock.inConnectionsMeta[targetLabel] = { field : sourceBlock.output, oid : sourceBlock.oid }
+            
+            
             //todo: generalize
             if(sourceBlock.results()){
-                targetBlock.inConnectionsMeta[targetLabel] = sourceBlock.output;
                 targetBlock.inputObservables[targetLabel](sourceBlock.results());
                 targetBlock.dirty(false);  
             }
             targetBlock.inConnections[targetLabel] = sourceBlock.results.subscribe(function(newValue){
-                targetBlock.inConnectionsMeta[targetLabel] = sourceBlock.output;
                 targetBlock.inputObservables[targetLabel](newValue);     
                 targetBlock.dirty(false);   
             });
@@ -95,22 +96,64 @@ sketchui.Register = function(options){
     
     self.deserialize = function(serializedState){
         
+        
+        // Placing all blocks on canvas
         for(x in serializedState.blocks){
             var data = serializedState.blocks[x];
             self.deserializeBlock(data);
         
         }
+        
+        // Setup connections
+        for(x in serializedState.blocks){
+            var data = serializedState.blocks[x];
+            var targetBlock = self.blocks[data.obj.oid];
+            var meta = data.obj.inConnectionsMeta;
+            for(var in_field in meta){
+
+                var m = meta[in_field];
+                var source = m.oid;
+                var sourceBlock = self.blocks[m.oid];
+                var sourceEndpoint = sourceBlock.outEndpoints[m.field.name];
+                var targetEndpoint = targetBlock.inEndpoints[in_field];
+               
+                jsPlumb.connect({
+                        source : sourceEndpoint,
+                        target : targetEndpoint,
+                    }
+                    
+                );
+            }
+        
+        }
+        
+        
+        // Populate serialized inputs and outputs
+        for(x in serializedState.blocks){
+            var data = serializedState.blocks[x];
+            var targetBlock = self.blocks[data.obj.oid];
+            var inputObservables = data.obj.inputObservables;
+            for(var i in inputObservables){
+                
+                var value = inputObservables[i];
+                console.log("value", i, value);
+                targetBlock.inputObservables[i](value);
+            }
+            targetBlock.dirty(data.obj.dirty);
+        
+        }
+        
+        
     
     };
     
     self.deserializeBlock = function(data){
-        console.log(data);
-        
+         
         var obj = data.obj;
         var constructor = sketchui[obj.className];
-        var block = new constructor();
+        var block = new constructor({oid: obj.oid});
         
-        block.dirty(obj.dirty);
+        
         block.minimized(data.view.minimized);
                 
         self.addBlock(block, self.containerSelector);
@@ -136,7 +179,7 @@ sketchui.Block = function(options){
     
     var self=this;
     self.register = null;
-    self.oid = sketchjs.generateOid('block');
+    self.oid = options.oid || sketchjs.generateOid('block');
     
     self.connectorId = "connector-" + self.oid;
     self.selector = "#"+self.oid;
@@ -372,10 +415,19 @@ sketchui.Block = function(options){
         out.obj.oid = self.oid;
         //serialize classes
         out.obj.className = self.className;
+
         out.obj.inputs = self.inputs;
         out.obj.output = self.output;
         
         out.obj.inConnectionsMeta = self.inConnectionsMeta;
+        
+        out.obj.inputObservables = {};
+        for(var i in self.inputObservables){
+            if(self.inputMeta[i]['type'] != 'objects_list'){
+                out.obj.inputObservables[i] = self.inputObservables[i]();
+            }
+        };
+        
         
         
         //out.obj.results = self.results();
@@ -405,15 +457,17 @@ sketchui.Block = function(options){
 
 
 
-sketchui.QueryBlock = function(){
+sketchui.QueryBlock = function(opts){
 
-    var options = { className : 'QueryBlock'};
+    var opts = opts || {};
+    var options = { className : 'QueryBlock', oid: opts.oid};
     var self = this;
     
     options.name = "query";
     options.inputs = [
         { 'name' : 'collection', type : 'text', connectable: true },
         { 'name' : 'querystring', type : 'textarea' },        
+        { 'name' : 'formatterEnabled', type : 'boolean', defaultValue : false },        
         { 'name' : 'formatter', type : 'text' },        
     ];
     
@@ -426,7 +480,7 @@ sketchui.QueryBlock = function(){
     self.processor = function(inputArgs, context){
     
         var dropCollection = self.results() || null;
-        var formatter = self.formatterEnabled() ? inputArgs.formatter : '';
+        var formatter = self.inputObservables['formatterEnabled']() ? inputArgs.formatter : '';
         self.dirty(true);
         
         //just skipping the query if there is not query or formatter    
@@ -435,7 +489,7 @@ sketchui.QueryBlock = function(){
             self.dirty(false);
         } else {      
         
-            sketchui.sketch.objects({}, inputArgs.collection, { query: inputArgs.querystring, formatter: formatter, write_collection:true, drop_collection:dropCollection, limit:1000 }, function(response){
+            sketchui.sketch.objects({ }, inputArgs.collection, { query: inputArgs.querystring, formatter: formatter, write_collection:true, drop_collection:dropCollection, limit:1000 }, function(response){
                context.results(response.collection_out);
                self.dirty(false);
            });
@@ -462,16 +516,16 @@ sketchui.QueryBlock = function(){
     
     //init code
     
-    self.formatterEnabled = ko.observable(false);
+    //self.formatterEnabled = ko.observable(false);
     
     self.formatters = ko.observableArray();
     sketchui.sketch.getFormattersInfo(function(response){
         self.formatters(response.results);
     
-    });
+    }, { async:false });
     
     self.availableCollections = ko.observableArray();
-    sketchui.sketch.getDbInfo({}, function(response){
+    sketchui.sketch.getDbInfo({ async:false }, function(response){
                self.availableCollections(response.results);
     });
     
@@ -481,9 +535,10 @@ sketchui.QueryBlock = function(){
 };
 
 
-sketchui.DbInfoBlock = function(){
+sketchui.DbInfoBlock = function(opts){
 
-    var options = { className : 'DbInfoBlock' };
+    var opts = opts || {};
+    var options = { className : 'DbInfoBlock', oid : opts.oid };
     var self = this;
     
     options.name = "dbinfo";
@@ -495,7 +550,7 @@ sketchui.DbInfoBlock = function(){
     self.templateUrl = '/static/ui/block-templates/dbinfo.html';
     self.processor = function(inputArgs, context){
     
-        sketchui.sketch.getDbInfo({}, function(response){
+        sketchui.sketch.getDbInfo({ async:false }, function(response){
                context.results(response.results);
                self.dirty(false);
             });
@@ -509,9 +564,10 @@ sketchui.DbInfoBlock = function(){
 
 
 
-sketchui.ListBlock = function(){
+sketchui.ListBlock = function(opts){
 
-    var options = { className : 'ListBlock' };
+    var opts = opts || {};
+    var options = { className : 'ListBlock', oid: opts.oid };
     var self = this;
     
     options.name = "listblock";
@@ -524,7 +580,7 @@ sketchui.ListBlock = function(){
     
     
     self.inputObservables['in_collection'].subscribe(function(newValue){
-        var inputType = self.inConnectionsMeta['in_collection']['type']; 
+        var inputType = self.inConnectionsMeta['in_collection']['field']['type']; 
         if(inputType == 'collection_name'){
             self.readRecords(newValue);
         }
@@ -551,9 +607,10 @@ sketchui.ListBlock = function(){
 
 
 
-sketchui.MapBlock = function(){
+sketchui.MapBlock = function(opts){
 
-    var options = { className : 'MapBlock' };
+    var opts = opts || {};
+    var options = { className : 'MapBlock', oid: opts.oid };
     var self = this;
     
     options.name = "mapblock";
@@ -566,7 +623,7 @@ sketchui.MapBlock = function(){
     
     
     self.inputObservables['in_collection'].subscribe(function(newValue){
-        var inputType = self.inConnectionsMeta['in_collection']['type']; 
+        var inputType = self.inConnectionsMeta['in_collection']['field']['type']; 
         if(inputType == 'collection_name'){
             self.readRecords(newValue);
         }
@@ -663,9 +720,10 @@ sketchui.MapBlock = function(){
 
 
 
-sketchui.WordCloudBlock = function(){
+sketchui.WordCloudBlock = function(opts){
 
-    var options = { className : 'WordCloudBlock' };
+    var opts = opts || {};
+    var options = { className : 'WordCloudBlock', oid:opts.oid };
     var self = this;
     
     options.name = "wordcloudblock";
@@ -685,7 +743,7 @@ sketchui.WordCloudBlock = function(){
     
     
     self.inputObservables['in_collection'].subscribe(function(newValue){
-        var inputType = self.inConnectionsMeta['in_collection']['type']; 
+        var inputType = self.inConnectionsMeta['in_collection']['field']['type']; 
         if(inputType == 'collection_name'){
             self.readRecords(newValue);
         }

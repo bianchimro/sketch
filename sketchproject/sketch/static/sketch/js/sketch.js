@@ -60,7 +60,7 @@ sketchjs.Sketch.prototype.login = function(username, pwd, successCallback){
 };
 
 
-
+// todo: uniform and sanitize options ...
 
 
 sketchjs.Sketch.prototype.getServerInfo = function(successCallback){
@@ -80,6 +80,7 @@ sketchjs.Sketch.prototype.getServerInfo = function(successCallback){
 sketchjs.Sketch.prototype.getDbInfo = function(options, successCallback){
 
     var db = options.database || this.database;
+    var async = options.async === false ? false: true;
 
     var url = this.url + "/sketch/db/" + db + "/";
     
@@ -88,62 +89,75 @@ sketchjs.Sketch.prototype.getDbInfo = function(options, successCallback){
         url: url,
         success: successCallback,
         dataType: 'json',
-        cache: false
+        cache: false,
+        async : async    
     });   
     
 };
 
 
-sketchjs.Sketch.prototype.getParsersInfo = function(successCallback){
+sketchjs.Sketch.prototype.getParsersInfo = function(successCallback, options){
 
     var url = this.url + "/sketch/parsers/";
+    var options = options || {};
+    var async = options.async === false ? false: true;
     
     $.ajax({
         type: 'GET',
         url: url,
         success: successCallback,
-        dataType: 'json'
+        dataType: 'json',
+        async : async
     });   
     
 };
 
 
-sketchjs.Sketch.prototype.getFormattersInfo = function(successCallback){
+sketchjs.Sketch.prototype.getFormattersInfo = function(successCallback, options){
 
     var url = this.url + "/sketch/formatters/";
+    var options = options || {};
+    var async = options.async === false ? false: true;
     
     $.ajax({
         type: 'GET',
         url: url,
         success: successCallback,
-        dataType: 'json'
+        dataType: 'json',
+        async : async
     });   
     
 };
 
-sketchjs.Sketch.prototype.getMappersInfo = function(successCallback){
+sketchjs.Sketch.prototype.getMappersInfo = function(successCallback, options){
 
     var url = this.url + "/sketch/mappers/";
+    var options = options || {};
+    var async = options.async === false ? false: true;
     
     $.ajax({
         type: 'GET',
         url: url,
         success: successCallback,
-        dataType: 'json'
+        dataType: 'json',
+        async : async
     });   
     
 };
 
 
-sketchjs.Sketch.prototype.getProcessorsInfo = function(successCallback){
+sketchjs.Sketch.prototype.getProcessorsInfo = function(successCallback, options){
 
     var url = this.url + "/sketch/processors/";
+    var options = options || {};
+    var async = options.async === false ? false: true;
     
     $.ajax({
         type: 'GET',
         url: url,
         success: successCallback,
-        dataType: 'json'
+        dataType: 'json',
+        async : async
     });   
     
 };
@@ -172,6 +186,7 @@ sketchjs.Sketch.prototype.query = function(collection, command, data, successCal
 sketchjs.Sketch.prototype.objects = function(options, collection, data, successCallback){
 
     var db = options.database || this.database;
+    var async = options.async === false ? false: true;
 
     var url = this.url + "/sketch/objects/" + db + "/" + collection + "/";
     console.log("objects", url);
@@ -180,7 +195,8 @@ sketchjs.Sketch.prototype.objects = function(options, collection, data, successC
         url: url,
         data: data,
         success: successCallback,
-        dataType: 'json'
+        dataType: 'json',
+        async : async
     });
     
     
@@ -194,7 +210,8 @@ sketchjs.Sketch.prototype.objects = function(options, collection, data, successC
 sketchjs.Sketch.prototype.import = function(options, collection, parser, data, commit, successCallback){
 
     var db = options.database || this.database;
-
+    var async = options.async === false ? false: true;
+    
     var url = this.url + "/sketch/import/" + db + "/" + collection + "/";
     var commitInteger = 0;
     if(Boolean(commit)){

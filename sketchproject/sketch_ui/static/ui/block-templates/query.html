@@ -21,9 +21,9 @@
                      <textarea data-bind="value: inputObservables['querystring']"></textarea>
                 </div>
                 <div>
-                    <label class="checkbox"><input type="checkbox" data-bind="checked: formatterEnabled"/>Format records</label>
+                    <label class="checkbox"><input type="checkbox" data-bind="checked: inputObservables['formatterEnabled']"/>Format records</label>
                 </div>
-                <div data-bind="visible: formatterEnabled">
+                <div data-bind="visible: inputObservables['formatterEnabled']">
                     <label>Formatter</label>
                     <select data-bind="options: formatters, value: inputObservables['formatter']"></select>
                 
