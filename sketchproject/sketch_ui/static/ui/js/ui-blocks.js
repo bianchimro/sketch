@@ -154,15 +154,9 @@ sketchui.Register = function(options){
         var constructor = sketchui[obj.className];
         var block = new constructor({oid: obj.oid});
         
-        
         block.minimized(data.view.minimized);
-                
         self.addBlock(block, self.containerSelector);
-        
         $(block.selector).offset(data.view.offset);
-
-        
-        jsPlumb.repaint(block.oid);
         
     
     };
