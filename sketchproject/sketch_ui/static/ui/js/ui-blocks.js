@@ -140,6 +140,7 @@ sketchui.Register = function(options){
                 targetBlock.inputObservables[i](value);
             }
             targetBlock.dirty(data.obj.dirty);
+            jsPlumb.repaint(data.obj.oid);
         
         }
         
@@ -408,8 +409,6 @@ sketchui.Block = function(options){
         var out = {
             obj : {},
             view : {}
-            
-        
         };
         
         out.obj.oid = self.oid;
@@ -428,8 +427,6 @@ sketchui.Block = function(options){
             }
         };
         
-        
-        
         //out.obj.results = self.results();
         out.obj.dirty = self.dirty();
         
@@ -437,16 +434,11 @@ sketchui.Block = function(options){
         out.view.minimized = self.minimized();
         return out;
         
-        
-        
-        
-    }
-    
+    };
     
     
     //garbage collection
     self.getReferencedCollections = function(){
-    
     
     };
     
@@ -510,6 +502,10 @@ sketchui.QueryBlock = function(opts){
     
     self.dirty.subscribe(function(newValue){
         self.preview(null);
+    });
+    
+    self.inputObservables['formatterEnabled'].subscribe(function(newValue){
+        jsPlumb.repaint(self.oid);
     });
     
     
