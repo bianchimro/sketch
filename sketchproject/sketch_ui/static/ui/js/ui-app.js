@@ -32,16 +32,8 @@ sketchui.SketchApp = function(){
     //inteface options
     self.uiOptions = {};
     self.uiOptions.canvasBackgrounds = ko.observableArray([]);
-    var currentBackground = { filename : 'old_mathematics.png',  filepath : "static/ui/backgrounds/old_mathematics.png"}
-    self.uiOptions.canvasBackground = ko.observable(currentBackground.filepath);
+    var currentBackground = 'old_mathematics.png';
     
-    console.log(currentBackground);
-    
-    
-    self.uiOptions.canvasBackground.subscribe(function(newValue){
-        console.log(newValue);
-        $("#blocks-canvas").css('background-image', "url('" +newValue + "')");
-    });
     
     $.ajax({
             url : '/ui/backgrounds/',
@@ -52,7 +44,15 @@ sketchui.SketchApp = function(){
             }
         
         });
+
+    self.uiOptions.canvasBackground = ko.observable(currentBackground);
     
+    console.log(currentBackground);
+    
+    
+    self.uiOptions.canvasBackground.subscribe(function(newValue){
+        $("#blocks-canvas").css('background-image', "url('/static/ui/backgrounds/" +newValue + "')");
+    });
     
     /* Methods */
     

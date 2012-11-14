@@ -107,7 +107,6 @@ def ui_backgrounds(request):
     path = os.path.join(settings.BASE_PATH , "sketch_ui/static/ui/backgrounds")
     files = os.listdir(path)
     for f in files:
-        el = { 'filename' : f, 'filepath' : "/static/ui/backgrounds/" + f}
-        out['results'].append(el)
+        out['results'].append(f)
     
     return HttpResponse(json.dumps(out))
