@@ -31,29 +31,33 @@ sketchui.SketchApp = function(){
     
     //inteface options
     self.uiOptions = {};
-    self.uiOptions.canvasBackgrounds = ko.observableArray([]);
+    self.canvasBackgrounds = ko.observableArray([]);
     var currentBackground = 'old_mathematics.png';
-    
+    self.canvasBackground = ko.observable();
     
     $.ajax({
             url : '/ui/backgrounds/',
             type : 'get',
+            async : false,
             dataType : 'json',
             success : function(data){
-                self.uiOptions.canvasBackgrounds(data['results']);
+                self.canvasBackgrounds(data['results']);
             }
         
         });
 
-    self.uiOptions.canvasBackground = ko.observable(currentBackground);
+    self.canvasBackground(currentBackground);    
     
-    console.log(currentBackground);
-    
-    
-    self.uiOptions.canvasBackground.subscribe(function(newValue){
-        $("#blocks-canvas").css('background-image', "url('/static/ui/backgrounds/" +newValue + "')");
+    self.canvasBackground.subscribe(function(newValue){
+        var v = "url('/static/ui/backgrounds/" +newValue + "')";
+        console.log(newValue, "x", v);
+        $("#blocks-canvas").css('background-image', v);
+   
     });
+
     
+
+
     /* Methods */
     
     
