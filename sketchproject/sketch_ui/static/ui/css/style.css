@@ -1,17 +1,14 @@
- body{
+body{
     height: 100%;
-    
 }
 
 .rowdiv{
     padding:5px;
-
 }
 
 .rowdiv:hover{
     background: #ccc;
 }
-
 
 .modal-small{
     width:300px;
@@ -25,13 +22,13 @@
     border-radius: 5px;
     background: white;
     min-width:150px;
-    
     margin:0 10px;
 }
 
 .block-window-button{
     margin:2px;
 }
+
 .queryblock{
     max-width:500px;
     min-width:150px;
@@ -42,8 +39,6 @@
 .queryblock-preview{
     padding: 10px;
 }
-
-
 
 .listblock{
     max-width:500px;
@@ -56,28 +51,25 @@
     width:500px;
     height:400px;
 }
-.map img { max-width:none; }
 
-
+.map img {
+    max-width:none; 
+}
 
 #blocks-canvas{ 
     background-image: url('../backgrounds/old_mathematics.png');
     background-repeat:repeat;
     min-height:1000px;
     background-attachment: fixed;
-/*
--webkit-touch-callout: none;
--webkit-user-select: none;
--khtml-user-select: none;
--moz-user-select: none;
--ms-user-select: none;
-user-select: none;
-*/
+    /*
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    */
 }
-
-
-
-
 
 #map-container{
     width:100%;
@@ -107,5 +99,10 @@ user-select: none;
     background: #ddd;
 }
 
-.run{background-color: #E1FFD2;}
-.notrun {background-color: #F7B3B3;}
+.run{
+    background-color: #E1FFD2;
+}
+
+.notrun {
+    background-color: #F7B3B3;
+}
