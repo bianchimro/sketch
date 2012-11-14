@@ -59,7 +59,7 @@ body{
 #blocks-canvas{ 
     background-image: url('../backgrounds/old_mathematics.png');
     background-repeat:repeat;
-    min-height:1000px;
+    min-height:2000px;
     background-attachment: fixed;
     /*
     -webkit-touch-callout: none;
