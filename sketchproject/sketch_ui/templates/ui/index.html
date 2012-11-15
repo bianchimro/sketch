@@ -2,7 +2,7 @@
 
 {% block extra_head %}
     <link rel="stylesheet" href="/static/ui/css/style.css"/><link rel="stylesheet" href="/static/sketch_ui/js/lib/jquery-ui-1.9.1.custom/css/ui-lightness/jquery-ui-1.9.1.custom.min.css" />
-    
+    <link rel="stylesheet" href="/static/sketch_ui/js/lib/json-tree-viewer/css/jquery.jsonview.css"/>
 {% endblock %}
 
 {% block nav %}
@@ -76,6 +76,7 @@
                 <div id="blocks-toolbar" data-bind="with: toolbar">
                     <button class="btn btn-primary" data-bind="click: addQuery"><i class="icon-search"></i>&nbsp;Query</Button>
                     <button class="btn btn-primary" data-bind="click: addList"><i class="icon-list"></i>&nbsp;List</Button>
+                    <button class="btn btn-primary" data-bind="click: addItemList"><i class="icon-list"></i>&nbsp;Item view</Button>
                     <button class="btn btn-primary" data-bind="click: addMap"><i class="icon-map-marker"></i>&nbsp;Map</Button>
                     <button class="btn btn-primary" data-bind="click: addWordCloud"><i class="icon-map-marker"></i>&nbsp;Word Cloud</Button>
         
@@ -176,6 +177,9 @@
     <!--<script src="/static/sketch_ui/js/lib/jquery.zoomooz.min.js"></script>-->
     
     <script src="/static/ui/jsPlumb/jquery.jsPlumb-1.3.16-all-min.js"></script>    
+    
+    
+    <script src="/static/sketch_ui/js/lib/json-tree-viewer/js/jquery.jsonview.js"></script>
     
      <script src="/static/sketch/js/sketch.js"></script>
 

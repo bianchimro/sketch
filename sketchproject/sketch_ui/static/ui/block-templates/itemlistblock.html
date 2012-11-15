@@ -1,14 +1,12 @@
  <div class="block listblock ui-widget-content">
      <div class="modal-header" data-bind="css: {run : !dirty(), notrun: dirty() }" >
          <button type="button" class="close" data-bind="click: remove">×</button>
-         <h3 data-bind="text: name"></h3>
+         <h4 data-bind="text: name"></h4>
      </div>
      <div class="modal-body">        
 
-             <div data-bind="with: currentItem">
+             <div data-bind="attr: { 'id': jsonDivOid }" class="jsonview">
          
-                 <div data-bind="text: $root.fromjson($data)">
-                 </div>
                  
              </div>
          

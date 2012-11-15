@@ -124,7 +124,6 @@ sketchui.Register = function(options){
                     
                 );
             }
-        
         }
         
         
@@ -709,7 +708,6 @@ sketchui.MapBlock = function(opts){
 
 
 
-
 sketchui.WordCloudBlock = function(opts){
 
     var opts = opts || {};
@@ -806,9 +804,7 @@ sketchui.WordCloudBlock = function(opts){
         self.renderCloud();
     
     };
-    
-    
-    
+     
     
     self.results.subscribe(function(newValue){
         var textField = self.inputObservables['text_field']();
@@ -844,44 +840,57 @@ sketchui.WordCloudBlock = function(opts){
 
 
 
-
-
-
-sketchui.ItemListBlock = function(){
-
-    var options = { className : 'ItemListBlock' };
+sketchui.ItemListBlock = function(opts){
+    
+    var opts = opts || {};
+    var options = { className : 'ItemListBlock', oid:opts.oid  };
     var self = this;
     
     
-    options.name = "listblock";
-    options.inputs = [{ name : 'results', type : 'objects_list', connectable: true}];
-    options.output = { name : 'results', type : 'objects_list'};
+    options.name = "Item View";
+    options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true}];
+    options.output = { name : 'results', type : 'object'};
     
     self = new sketchui.Block(options);
     
     self.currentIndex = ko.observable(null);
-    self.currentItem = ko.computed(function(){
-        if(self.currentIndex() !== null){
-            return self.results()[self.currentIndex];
-        }
-    });
+    self.currentItem = ko.observable(null);
 
    
-    self.results.subscribe(function(){
-        self.currentIndex(0);
+    self.inputObservables['in_collection'].subscribe(function(newValue){
+
+        self.dirty(true);
+        var inputType = self.inConnectionsMeta['in_collection']['field']['type']; 
+        if(inputType == 'collection_name'){
+               sketchui.sketch.objects({}, newValue, { limit: 1 }, function(response){
+               self.currentIndex(0);
+               self.currentItem(response.results[0]);
+           });
+        }
+        if(inputType == 'objects_list'){
+            self.currentIndex(0);
+            self.currentItem(newValue[0]);
+        }
+        self.dirty(false)
+        
     });
     
+    /*
+    self.currentIndex.subscribe(function(newValue){
+      
+    });
+    */
     
     self.templateUrl = '/static/ui/block-templates/itemlistblock.html';
-    self.fromjson=function(data){
-        return JSON.stringify(data);
-    };
     
     
-    self.inputObservables['results'].subscribe(function(newValue){
-        self.results(newValue);
+    self.currentItem.subscribe(function(newValue){
+        $('#'+self.jsonDivOid).empty();
+        $('#'+self.jsonDivOid).jsonView(newValue, {"status": "close"});
+        jsPlumb.repaint(self.oid);
     });
     
+    self.jsonDivOid = "jsonDiv" + self.oid;
     
     return self;
 
