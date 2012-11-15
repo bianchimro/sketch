@@ -254,7 +254,6 @@ def objects(request, collection, database=None):
         query_dict = getQueryDict(request)
         offset = getOffset(request)
         limit = getLimit(request)
-        print "uuu", limit
         write_collection = getWriteCollection(request)
         formatter = getFormatter(request)
         

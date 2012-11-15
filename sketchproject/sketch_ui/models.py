@@ -1,7 +1,11 @@
+import uuid
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import User
+
 from json_field import JSONField
-import uuid
+
 
 def generate_oid():
     return str(uuid.uuid4()).replace('-', '')
@@ -16,6 +20,8 @@ class InterfaceState(models.Model):
     state = JSONField(null=True, blank=True)
     
     temporary = models.BooleanField(default=True, null=False)
+    created = models.DateField(auto_now_add=True)
+    last_alive = models.DateField(auto_now=True)
     
     
     def __unicode__(self):
@@ -27,3 +33,20 @@ class InterfaceState(models.Model):
             self.oid = generate_oid()
         
         super(InterfaceState, self).save(*args, **kwargs)
+        
+        
+
+class CollectionReference(models.Model):
+    
+    interface_state = models.ForeignKey(InterfaceState)
+    collection_name = models.CharField(max_length="300")
+    last_alive = models.DateField(auto_now=True)
+    
+    
+
+#todo: move to a Manager
+def getObsoleteCollections():
+    #now = datetime.datetime.now()
+    #old_before = now + datetime.timedelta()
+    qset = CollectionReference.objects.filter(interface_state__temporary = True)
+    return qset

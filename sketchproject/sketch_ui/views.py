@@ -14,7 +14,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core import serializers
 
 from sketch.helpers import createBaseResponseObject, createResponseObjectWithError, instanceDict
-from models import InterfaceState
+from models import InterfaceState, CollectionReference
 
 
 @login_required(login_url="/login/")
@@ -97,8 +97,50 @@ def ui_states(request):
         out['results'].append(instanceDict(o))
     
     return HttpResponse(json.dumps(out))
+
+
+
+
+@login_required(login_url="/login/")    
+def ui_collections_references(request):
     
+    out = createBaseResponseObject()
+    out.results = { 'alive' : [], 'dead':[]}
     
+    if request.POST:
+    
+        collection_names = request.POST.get('alive_collections', [])
+        interface_oid = request.POST.get('oid',None)
+        
+        try:
+            interface_state = InterfaceState.objects.get(oid=interface_oid)
+        except:
+            raise
+        
+        for collection_name in collection_names:
+            try:
+                obj = CollectionReference.objects.get(collection_name=collection_name)
+            except:
+                obj = CollectionReference(collection_name=collection_name, interface_state=interface_state)
+                
+            obj.save()
+            out['results']['alive'].append(obj.collection_name)
+            
+        dead_collections = request.POST.get('dead_collections', [])
+
+        #prevents from client stupid requests (#TODO: should raise exception instead!)
+        for collection_name in [x for x in to_drop if x not in collection_names]:
+            try:
+                obj = CollectionReference.objects.get(collection_name=collection_name)
+                obj.delete()
+                out['results']['dead'].append(obj.collection_name)
+            except:
+                pass
+        
+    return HttpResponse(json.dumps(out))
+
+
+
 def ui_backgrounds(request):
     """
     Lists all available backgrounds
@@ -110,3 +152,5 @@ def ui_backgrounds(request):
         out['results'].append(f)
     
     return HttpResponse(json.dumps(out))
+    
+    
