@@ -245,6 +245,7 @@ sketchui.SketchApp = function(){
     
     
     self.startSaveLoop = function(){
+        return;
         if(!self.saveLoopHandler){
             self.saveLoopHandler = setInterval(self.saveState, 10000);
         }

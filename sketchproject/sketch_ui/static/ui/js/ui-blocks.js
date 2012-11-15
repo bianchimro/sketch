@@ -321,21 +321,18 @@ sketchui.Block = function(options){
            endpoint:["Dot", { radius:20 }],
            paintStyle:{ fillStyle:sourceColor},
            isSource: true,
-           connectorStyle:{ strokeStyle:sourceColor, lineWidth:5 },
-           connector: ["Flowchart"],
-           overlays: [
-	        	[ "Arrow", { foldback:0.2 } ],
-	        	[ "Label", { cssClass:"labelClass" } ]	
-	        ],
+           connectorStyle:{ strokeStyle:sourceColor, lineWidth:8 },
+           connector: ["Bezier", { curviness: 150 }],
            maxConnections:10,
            connectionsDetachable : true,
-           anchor:"TopCenter"
+           anchor:"TopCenter",
+           
        };
        
        var output = self.output;
-       var opts = { anchor:"BottomCenter", label:output.name };
+       var opts = { anchor:"BottomCenter" };
        self.outEndpoints[output.name] = jsPlumb.addEndpoint(self.containerElement,  opts, sourceEndpoint);
-       
+       self.outEndpoints[output.name].setLabel({ location:[0.5, 0.5], label:output.name, cssClass:"endpointTargetLabel" });
     
     };
     
@@ -349,7 +346,7 @@ sketchui.Block = function(options){
            paintStyle:{ fillStyle:targetColor},
            isTarget:true,
            connectorStyle:{ },
-           connector: ["FlowChart", { curviness:63 } ],
+           connector: ["Bezier", { curviness:150 } ],
            maxConnections:1,
            connectionsDetachable : true
            //isTarget:true,
@@ -361,9 +358,9 @@ sketchui.Block = function(options){
             if(!inp.connectable){
                 continue;
             }
-            var opts = { anchors:"TopCenter", label:inp.name };
+            var opts = { anchors:"AutoDefault",};
             self.inEndpoints[inp.name] = jsPlumb.addEndpoint(self.containerElement,  opts, targetEndpoint);
-            
+            self.inEndpoints[inp.name].setLabel({ label: inp.name, cssClass:"endpointSourceLabel" });
             
         }
     };
@@ -863,6 +860,7 @@ sketchui.ItemListBlock = function(opts){
         var inputType = self.inConnectionsMeta['in_collection']['field']['type']; 
         if(inputType == 'collection_name'){
                sketchui.sketch.objects({}, newValue, { limit: 1 }, function(response){
+                console.log("r", response);
                self.currentIndex(0);
                self.currentItem(response.results[0]);
            });

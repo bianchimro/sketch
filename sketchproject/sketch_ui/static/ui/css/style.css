@@ -23,6 +23,7 @@ body{
     background: white;
     min-width:150px;
     margin:0 10px;
+    z-index:10;
 }
 
 .block-window-button{
@@ -54,6 +55,11 @@ body{
 
 .map img {
     max-width:none; 
+}
+
+.jquery-jsonview>div{
+    background:white;
+    padding:0 10px;
 }
 
 #blocks-canvas{ 
@@ -105,4 +111,15 @@ body{
 
 .notrun {
     background-color: #F7B3B3;
+}
+
+
+.endpointTargetLabel {
+z-index: 1000;
+
+}
+
+.endpointSourceLabel {
+z-index: 1000;
+
 }

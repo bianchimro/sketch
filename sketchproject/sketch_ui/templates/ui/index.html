@@ -76,7 +76,7 @@
                 <div id="blocks-toolbar" data-bind="with: toolbar">
                     <button class="btn btn-primary" data-bind="click: addQuery"><i class="icon-search"></i>&nbsp;Query</Button>
                     <button class="btn btn-primary" data-bind="click: addList"><i class="icon-list"></i>&nbsp;List</Button>
-                    <button class="btn btn-primary" data-bind="click: addItemList"><i class="icon-list"></i>&nbsp;Item view</Button>
+                    <button class="btn btn-primary" data-bind="click: addItemList"><i class="icon-eye-open"></i>&nbsp;Item view</Button>
                     <button class="btn btn-primary" data-bind="click: addMap"><i class="icon-map-marker"></i>&nbsp;Map</Button>
                     <button class="btn btn-primary" data-bind="click: addWordCloud"><i class="icon-map-marker"></i>&nbsp;Word Cloud</Button>
         
@@ -201,8 +201,13 @@
         jsPlumb.ready(function(){
     
             jsPlumb.importDefaults({
-                ConnectorZIndex:1000,
-                ConnectionZIndex:1000,
+                ConnectorZIndex:5,
+                DragOptions : { cursor: 'pointer', zIndex:2000 },
+                ConnectionOverlays : [
+					[ "Arrow", { location:0.9 } ]
+				]
+                
+                
             });
         
             sketchui.app = new sketchui.SketchApp();
