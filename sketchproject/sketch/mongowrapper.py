@@ -209,7 +209,7 @@ mongo.connect()
 
 #dropping all existing results
 #todo: use some smart gc strategy
-#mongo.dropResultsCollections(settings.MONGO_SERVER_DEFAULT_DB)
+mongo.dropResultsCollections(settings.MONGO_SERVER_DEFAULT_DB)
 
 
 
