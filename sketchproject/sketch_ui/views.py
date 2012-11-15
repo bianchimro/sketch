@@ -14,7 +14,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core import serializers
 
 from sketch.helpers import createBaseResponseObject, createResponseObjectWithError, instanceDict
-from models import InterfaceState, CollectionReference
+from models import InterfaceState, CollectionReference, dropObsoleteMongoResults
 
 
 @login_required(login_url="/login/")
@@ -84,7 +84,7 @@ def ui_state(request):
                 out['errors'].append(str(e))
                 out['status'] = 0
 
-    return HttpResponse(json.dumps(out))
+    return HttpResponse(json.dumps(out, cls=DjangoJSONEncoder))
     
 @login_required(login_url="/login/")    
 def ui_states(request):
@@ -96,7 +96,7 @@ def ui_states(request):
     for o in qset:
         out['results'].append(instanceDict(o))
     
-    return HttpResponse(json.dumps(out))
+    return HttpResponse(json.dumps(out, cls=DjangoJSONEncoder))
 
 
 
@@ -105,19 +105,24 @@ def ui_states(request):
 def ui_collections_references(request):
     
     out = createBaseResponseObject()
-    out.results = { 'alive' : [], 'dead':[]}
+    out['results'] = { 'alive' : [], 'dead':[]}
     
     if request.POST:
     
-        collection_names = request.POST.get('alive_collections', [])
+        alive_collections = request.POST.get('alive_collections', None)
         interface_oid = request.POST.get('oid',None)
+        
+        try:
+            alive_collections = json.loads(alive_collections);
+        except:
+            alive_collections = []
         
         try:
             interface_state = InterfaceState.objects.get(oid=interface_oid)
         except:
             raise
         
-        for collection_name in collection_names:
+        for collection_name in alive_collections:
             try:
                 obj = CollectionReference.objects.get(collection_name=collection_name)
             except:
@@ -127,15 +132,23 @@ def ui_collections_references(request):
             out['results']['alive'].append(obj.collection_name)
             
         dead_collections = request.POST.get('dead_collections', [])
+        try:
+            dead_collections = json.loads(dead_collections);
+        except:
+            dead_collections = []
 
         #prevents from client stupid requests (#TODO: should raise exception instead!)
-        for collection_name in [x for x in to_drop if x not in collection_names]:
+        for collection_name in [x for x in dead_collections if x not in alive_collections]:
             try:
                 obj = CollectionReference.objects.get(collection_name=collection_name)
                 obj.delete()
                 out['results']['dead'].append(obj.collection_name)
             except:
                 pass
+                
+        #TODO: move elsewhere!
+        dropObsoleteMongoResults()
+        
         
     return HttpResponse(json.dumps(out))
 

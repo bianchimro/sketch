@@ -10,6 +10,7 @@ sketchui.Register = function(options){
     var self=this;
     self.blocks = {};
     self.containerSelector = options.containerSelector || null;
+    self.aliveCollections = {};
     
     jsPlumb.bind("jsPlumbConnection", function(info) {
              
@@ -155,6 +156,38 @@ sketchui.Register = function(options){
         
     
     };
+    
+    
+    
+    self.getReferencedCollections = function(){
+        
+        var collections = [];
+        for(var oid in self.blocks){
+            var blo = self.blocks[oid];
+            collections = collections.concat(blo.getReferencedCollections())
+        }
+        
+        var dead = [];
+        for(var coll_name in self.aliveCollections){
+            if(collections.indexOf(coll_name) < 0){
+                dead.push(coll_name);
+            }
+        };
+        
+        var alive = [];
+        self.aliveCollections = {};
+        for(var i=0,n=collections.length;i<n;i++){
+            coll_name = collections[i];
+            self.aliveCollections[coll_name] = true;
+            alive.push(coll_name);
+        }
+        
+        return {dead:dead, alive:alive};
+    
+    };
+    
+    
+    
     
 
 

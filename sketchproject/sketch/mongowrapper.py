@@ -6,6 +6,8 @@ import bson
 import bson.json_util
 import uuid
 
+default_mongo_db = settings.MONGO_SERVER_DEFAULT_DB
+
 class MongoWrapper(object):
     """
     This class interacts with Mongo Db instance 
@@ -207,7 +209,7 @@ mongo.connect()
 
 #dropping all existing results
 #todo: use some smart gc strategy
-mongo.dropResultsCollections(settings.MONGO_SERVER_DEFAULT_DB)
+#mongo.dropResultsCollections(settings.MONGO_SERVER_DEFAULT_DB)
 
 
 

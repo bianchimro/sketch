@@ -45,8 +45,33 @@ class CollectionReference(models.Model):
     
 
 #todo: move to a Manager
+"""
 def getObsoleteCollections():
     #now = datetime.datetime.now()
     #old_before = now + datetime.timedelta()
-    qset = CollectionReference.objects.filter(interface_state__temporary = True)
+    qset = CollectionReference.objects.all()
     return qset
+"""
+
+#TODO: review this and move it elsewhere
+def dropObsoleteMongoResults():
+
+    out = []
+    qset = CollectionReference.objects.all()
+    referenced = [obj.collection_name for obj in qset]
+    
+    from sketch.mongowrapper import mongo, default_mongo_db
+    collections = mongo.getDb(default_mongo_db).collection_names()
+    for coll in collections:
+        if coll.startswith("results"):
+            if coll not in referenced:
+                out.append(coll)
+                mongo.dropCollection(default_mongo_db, coll)
+                
+    print "dropped collections:", out
+    return out
+    
+    
+    
+    
+

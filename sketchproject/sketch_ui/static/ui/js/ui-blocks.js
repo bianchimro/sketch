@@ -262,6 +262,28 @@ sketchui.Block = function(options){
     
     //garbage collection
     self.getReferencedCollections = function(){
+        
+        var collections = [];
+        
+        for(var i=0;i<self.numInputs; i++){
+            var inp = self.inputs[i];
+            if(inp.type == 'collection_name'){
+                var value = self.inputObservables[inp.name](); 
+                if(value !== undefined && value !== null){
+                    collections.push(value);
+                }
+            }
+    
+        }
+        
+        if(self.output.type == 'collection_name'){
+                var value = self.results(); 
+                if(value !== undefined && value !== null){
+                    collections.push(value);
+                }
+            }
+        
+        return collections;
     
     };
     
@@ -280,7 +302,7 @@ sketchui.QueryBlock = function(opts){
     
     options.name = "query";
     options.inputs = [
-        { 'name' : 'collection', type : 'text', connectable: true },
+        { 'name' : 'collection', type : 'collection_name', connectable: true },
         { 'name' : 'querystring', type : 'textarea' },        
         { 'name' : 'formatterEnabled', type : 'boolean', defaultValue : false },        
         { 'name' : 'formatter', type : 'text' },        

@@ -48,7 +48,6 @@ def ajaxLogin(request):
 
 
 def getServerInfo():
-    mongo = MongoWrapper()
     
     try:
         out = createBaseResponseObject()
