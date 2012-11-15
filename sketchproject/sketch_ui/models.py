@@ -20,7 +20,7 @@ class InterfaceState(models.Model):
     state = JSONField(null=True, blank=True)
     
     temporary = models.BooleanField(default=True, null=False)
-    created = models.DateField(auto_now_add=True)
+    created = models.DateField(auto_now=True)
     last_alive = models.DateField(auto_now=True)
     
     
