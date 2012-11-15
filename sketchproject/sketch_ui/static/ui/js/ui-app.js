@@ -5,12 +5,12 @@ var sketchui = sketchui || {};
 sketchui.SketchApp = function(){
 
     var self = this;
-
     
     self.oid = ko.observable(sketchjs.generateOid());
     self.oidProxy = ko.observable(self.oid);
     
-    self.temporary = ko.observable(false);
+    self.temporary = ko.observable(true);
+    self.beenSaved = ko.observable(false);
     
     self.fileName = ko.observable('');
     self.fileNameProxy = ko.observable('');
@@ -149,10 +149,12 @@ sketchui.SketchApp = function(){
                      temporary : self.temporary()
             },
             success : function(data){
+                console.log("response", data);
                 var res = data['results'][0];
                 
                 self.oid(res.oid);
                 self.oidProxy(res.oid);
+                self.beenSaved(true);
                 
                 if(res.state_name){
                     self.fileName(res.state_name);     
@@ -210,7 +212,9 @@ sketchui.SketchApp = function(){
                 self.fileNameProxy(res.state_name);
                 self.description(res.description)
                 self.setState(res.state);
+                
                 self.temporary(res.temporary);
+                self.beenSaved(true);
                 
                 if (callback instanceof Function){
                     callback();
@@ -244,10 +248,33 @@ sketchui.SketchApp = function(){
     
     
     
+    self.notifyCollectionsOrSave = function(){
+    
+        if(!self.beenSaved()){
+            console.log("into temporary");
+            self.saveState(self.notifyCollections);
+        } else  {
+            console.log("not into temporary");
+            self.notifyCollections();
+        }
+    
+    };
+    
+    
+    self.notifyCollections = function(){
+    
+        var coll = self.register.getReferencedCollections();
+        var opts = {alive_collections:JSON.stringify(coll.alive), dead_collections:JSON.stringify(coll.dead), oid:self.oid()};
+        console.log("oo", opts);
+        sketchui.notifyCollections(opts);
+    
+    };
+    
+    
+    
     self.startSaveLoop = function(){
-        return;
         if(!self.saveLoopHandler){
-            self.saveLoopHandler = setInterval(self.saveState, 10000);
+            self.saveLoopHandler = setInterval(self.notifyCollectionsOrSave, 10000);
         }
     
     };
