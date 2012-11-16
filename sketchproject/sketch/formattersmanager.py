@@ -12,7 +12,7 @@ formattersManager = RecordFormatter()
 #TODO: CONSIDER GENERATORS!
 
 #example formatter function
-def dummyFormatter(record):
+def dummyFormatter(record, *args, **kwargs):
     """
     This function does nothing, it just returns the record.
     """
@@ -20,7 +20,7 @@ def dummyFormatter(record):
     return record
 
 
-def foursquare_geojson(object):
+def foursquare_geojson(object, *args, **kwargs):
     """
     Returns geojson object from a Foursquare data record.
     Only the id attribute is passed in geometric feature property.
@@ -43,7 +43,7 @@ def foursquare_geojson(object):
     return out
 
 
-def twitter_geojson(object):
+def twitter_geojson(object, *args, **kwargs):
     """
     Returns geojson object from a Foursquare data record.
     Only the id attribute is passed in geometric feature property.

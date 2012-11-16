@@ -5,6 +5,8 @@ when you run "manage.py test".
 from __future__ import absolute_import
 from django.test import TestCase
 from sketch.mongowrapper import mongo
+import sketch.operations
+import sketch.sources
 
 class MongoWrapperTest(TestCase):
     def test_basic_addition(self):
@@ -24,4 +26,22 @@ class MongoWrapperTest(TestCase):
         
         self.assertEqual(obj_q, obj_i)
         
+    
+    def test_operations_mongosource_records(self):
         
+        m = sketch.sources.MongoCollectionSource()
+        records = m.records({'collection_name' : 'tweets'})
+    
+    def test_operation_1(self):
+        
+        m = sketch.operations.SketchOperation('mongo', source_arguments = {'collection_name' : 'tweets'})
+        collection_name = m.perform()
+        print collection_name
+        
+        
+    def test_operation_formatter(self):
+    
+        map_operations_data = [{'name' : 'formatters.twitter_geojson'} ]
+        m = sketch.operations.SketchOperation('mongo', source_arguments = {'collection_name' : 'tweets'}, map_operations_data=map_operations_data)
+        collection_name = m.perform()
+        print collection_name

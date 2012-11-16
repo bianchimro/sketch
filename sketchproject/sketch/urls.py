@@ -36,4 +36,8 @@ urlpatterns = patterns('sketch.views',
     url(r'object/(?P<collection>\w+)/(?P<oid>\w+)/$', 'object'),
     url(r'object/(?P<database>\w+)/(?P<collection>\w+)/(?P<oid>\w+)/$', 'object'),
     
+    
+    url(r'operation/$', 'operation'),
+    
+    
 )

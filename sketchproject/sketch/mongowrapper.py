@@ -7,6 +7,7 @@ import bson.json_util
 import uuid
 
 default_mongo_db = settings.MONGO_SERVER_DEFAULT_DB
+results_mongo_db = settings.MONGO_SERVER_DEFAULT_DB
 
 class MongoWrapper(object):
     """

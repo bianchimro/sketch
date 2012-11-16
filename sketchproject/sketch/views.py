@@ -20,7 +20,7 @@ import recordparser
 
 from models import SketchMapper, SketchCollection
 
-
+import sketch.operations
 
 
 
@@ -284,7 +284,39 @@ def objects(request, collection, database=None):
   
     return HttpResponse(json.dumps(out, default=bson.json_util.default))
 
+def operation(request):
 
+    out = createBaseResponseObject()
+    
+    if request.POST:
+    
+        source_name = request.POST['source_name']
+        source_arguments_json = request.POST.get('source_arguments', '{}')
+        source_arguments = json.loads(source_arguments_json, object_hook=bson.json_util.object_hook)
+        
+        map_operations_data_json = request.POST.get('map_operations_data', '[]');
+        map_operations_data =json.loads(map_operations_data_json, object_hook=bson.json_util.object_hook)
+
+        #map_operations_data = [{'name' : 'formatters.twitter_geojson'} ]
+        
+        m = sketch.operations.SketchOperation(source_name, source_arguments = source_arguments, map_operations_data=map_operations_data)
+        
+        try:
+            collection_name = m.perform()
+            out['collection_out'] = collection_name
+        except Exception, e:
+            raise
+            out['errors'] = str(e)
+            out['status'] = 0
+            
+    
+    return HttpResponse(json.dumps(out, default=bson.json_util.default))
+
+    
+    
+    
+    
+    
 
 #TODO: this must be completed
 @decorators.login_required

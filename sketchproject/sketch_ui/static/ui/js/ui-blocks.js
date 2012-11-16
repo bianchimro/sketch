@@ -325,11 +325,29 @@ sketchui.QueryBlock = function(opts){
              context.results(inputArgs.collection);   
             self.dirty(false);
         } else {      
-        
+           
+           // commented version with objects
+           /*
             sketchui.sketch.objects({ }, inputArgs.collection, { query: inputArgs.querystring, formatter: formatter, write_collection:true, drop_collection:dropCollection, limit:1000 }, function(response){
                context.results(response.collection_out);
                self.dirty(false);
            });
+          */
+          
+          var mapOperationsData = [];
+          if (formatter){
+            mapOperationsData.push({ 'name' : 'formatters.' + formatter});
+          };
+            
+          sketchui.sketch.operation('mongo', 
+                                { 'collection_name' : inputArgs.collection, 'query_dict':inputArgs.querystring || {} },
+                                mapOperationsData,
+                                { success : function(response){
+                                       context.results(response.collection_out);
+                                       self.dirty(false);
+                                    }
+                                    
+                                });
         }
            
     };

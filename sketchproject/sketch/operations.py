@@ -1,19 +1,35 @@
+from sketch import sourcesManager, resultsBackend
+from mongowrapper import mongo, default_mongo_db, results_mongo_db
 
-class MapOperationFactory(object):
+from formattersmanager import formattersManager
 
-    def __init__(self,data):
-        self.data = data
+# FORMATTERS AND MAPPERS
+# FOR NOW WE IMAGINE A STRING PATTERN ... TO BE  CHANGED
+# ONLY FOR FORMATTERS RIGHT NOW
 
-class ReduceOperationFactory(object):
+class MapOperationWrapper(object):
 
-    def __init__(self,data):
-        self.data = data
+    def __init__(self, operation):
+        self.operation = operation
 
-class SourceFactory(object):
+    def __call__(self, data, *args, **kwargs):
+        for d in data:
+            yield self.operation(d, *args, **kwargs)
 
-    def __init__(self,source_name):
-        self.data = source_name
 
+def MapOperationFactory(options):
+
+    name = options['name']
+    pieces = name.split('.')
+    if pieces[0] == 'formatters':
+        wrapper = MapOperationWrapper(formattersManager.getFormatter(pieces[1]))
+        return wrapper
+    
+    raise
+
+
+def ReduceOperationFactory(options):
+    pass
 
 
 
@@ -23,7 +39,7 @@ class SketchOperation(object):
 
         self.save_hints = save_hints
         self.source_arguments = source_arguments
-        self.source = SourceFactory(source_name)
+        self.source = sourcesManager.getSourceInstance(source_name)
         
         self.map_operations = []
         self.reduce_operations = []
@@ -39,16 +55,21 @@ class SketchOperation(object):
     
     def perform(self):
         
-        data = self.source.records(source_arguments)
+        data = self.source.records(self.source_arguments)
         map_data = data
         for operation in self.map_operations:
-            map_data = operation.apply(data)
+            map_data = operation(map_data)
         
-        reduce_data = map_data
+        reduced_data = map_data
         for operation in self.reduce_operations:
-            reduced_data = operation.apply(data)
+            reduced_data = operation(data)
             
         
-        results_bucket = sketch.resultsBackend.write(reduced_data, hints=self.save_hints)
+        results_bucket = resultsBackend.write(reduced_data, hints=self.save_hints)
         return results_bucket
+        
+    
+
+
+
         

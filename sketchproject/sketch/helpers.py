@@ -34,6 +34,7 @@ def createBaseResponseObject():
     out = dict()
     out['status'] = '1'
     out['results'] = []
+    out['collection_out'] = None
     out['errors'] = []
 
     return out
