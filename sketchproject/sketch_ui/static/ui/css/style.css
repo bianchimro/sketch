@@ -21,9 +21,9 @@ body{
     -moz-border-radius: 5px;
     border-radius: 5px;
     
-    -moz-box-shadow: 5px 5px 5px #ddd;
-    -webkit-box-shadow: 5px 5px 5px #ddd;
-    box-shadow: 5px 5px 5px #ddd;
+    -moz-box-shadow: 5px 5px 15px #444;
+    -webkit-box-shadow: 5px 5px 15px #444;
+    box-shadow: 5px 5px 15px #444;
     
     
     background: white;
