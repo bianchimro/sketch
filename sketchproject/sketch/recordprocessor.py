@@ -26,6 +26,10 @@ class RecordProcessor(object):
     
     def getProcessors(self):
         return self.processingFunctions.keys()
+
+        
+    def getProcessor(self, name):
+        return self.processingFunctions[name]
         
         
     def processRecords(self, recordsList, functionName, *args, **kwargs):

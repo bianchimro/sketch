@@ -251,10 +251,8 @@ sketchui.SketchApp = function(){
     self.notifyCollectionsOrSave = function(){
     
         if(!self.beenSaved()){
-            console.log("into temporary");
             self.saveState(self.notifyCollections);
         } else  {
-            console.log("not into temporary");
             self.notifyCollections();
         }
     
@@ -265,7 +263,6 @@ sketchui.SketchApp = function(){
     
         var coll = self.register.getReferencedCollections();
         var opts = {alive_collections:JSON.stringify(coll.alive), dead_collections:JSON.stringify(coll.dead), oid:self.oid()};
-        console.log("oo", opts);
         sketchui.notifyCollections(opts);
     
     };

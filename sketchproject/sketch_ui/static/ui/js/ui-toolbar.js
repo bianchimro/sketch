@@ -28,7 +28,9 @@ sketchui.ToolBar = function(register, canvasSelector){
          var db = self.register.addBlock(new sketchui.WordCloudBlock(), canvasSelector);
      };
 
-     
+     self.addWordCount = function(){
+         var db = self.register.addBlock(new sketchui.WordCountBlock(), canvasSelector);
+     };
      
      self.zoomOut = function(){
         //not working yet;

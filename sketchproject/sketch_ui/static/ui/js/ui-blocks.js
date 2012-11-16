@@ -342,6 +342,7 @@ sketchui.QueryBlock = function(opts){
           sketchui.sketch.operation('mongo', 
                                 { 'collection_name' : inputArgs.collection, 'query_dict':inputArgs.querystring || {} },
                                 mapOperationsData,
+                                [],
                                 { success : function(response){
                                        context.results(response.collection_out);
                                        self.dirty(false);
@@ -767,4 +768,91 @@ sketchui.ItemListBlock = function(opts){
     return self;
 
 }
+
+
+
+
+sketchui.WordCountBlock = function(opts){
+    
+    var opts = opts || {};
+    var options = { className : 'WordCountBlock', oid:opts.oid  };
+    var self = this;
+    
+    
+    options.name = "Word count";
+    options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true},
+        { name : 'field_name', type : 'text', connectable: false, defaultValue : 'text'},
+        { name : 'num_words', type : 'integer', connectable: false, defaultValue : 20},
+        { name : 'min_length', type : 'integer', connectable: false, defaultValue : 4}
+        
+    ];
+
+    options.output = { name : 'results', type : 'collection_name'};
+    
+    self = new sketchui.Block(options);
+    
+    self.inputObservables['in_collection'].subscribe(function(newValue){
+
+        self.dirty(true);
+        
+        self.dirty(false)
+        
+    });
+    
+    /*
+    self.currentIndex.subscribe(function(newValue){
+      
+    });
+    */
+    
+    self.templateUrl = '/static/ui/block-templates/wordcount.html';
+   
+   
+   self.processor = function(inputArgs, context){
+     
+          var reduceOperationsData = [];
+         
+         reduceOperationsData.push(
+            { 'name' : 'processors.frequentWords', 
+              'arguments': { num_words : parseInt(inputArgs.num_words), 
+                             text_field:inputArgs.field_name,
+                             min_length:parseInt(inputArgs.min_length),
+                            }
+              
+            });
+         
+            
+          sketchui.sketch.operation('mongo', 
+                                { 'collection_name' : inputArgs.in_collection },
+                                [],
+                                reduceOperationsData,
+                                { success : function(response){
+                                        console.log("eee", response);
+                                       context.results(response.collection_out);
+                                       self.dirty(false);
+                                    }
+                                    
+                                });
+    
+           
+    };
+    
+    return self;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
