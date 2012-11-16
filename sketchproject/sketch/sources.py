@@ -25,8 +25,11 @@ class SourceManager(object):
     def getSourceInstance(self, name):
         return self.sources[name]()
 
+
+
 class BaseSketchSource(object):
     pass
+
     
     
 class MongoCollectionSource(BaseSketchSource):
@@ -44,7 +47,6 @@ class MongoCollectionSource(BaseSketchSource):
         db_name = options.get('db_name', default_mongo_db)
         collection_name = options['collection_name']
         query_dict = options.get('query_dict', {})
-        print "xxx", query_dict
         offset = options.get('offset', 0)
         limit = options.get('limit', 100)
         

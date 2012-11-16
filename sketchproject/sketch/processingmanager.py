@@ -1,7 +1,7 @@
 """
 processingmanager module.
 This module contains an instance of RecordProcessor,
-to be used to register processor funcions
+to be used to register processor functions
 
 """
 
