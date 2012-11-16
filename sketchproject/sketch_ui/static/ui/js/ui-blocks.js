@@ -300,7 +300,7 @@ sketchui.QueryBlock = function(opts){
     var options = { className : 'QueryBlock', oid: opts.oid};
     var self = this;
     
-    options.name = "query";
+    options.name = "Mongo Query";
     options.inputs = [
         { 'name' : 'collection', type : 'collection_name', connectable: true },
         { 'name' : 'querystring', type : 'textarea' },        
@@ -382,7 +382,7 @@ sketchui.DbInfoBlock = function(opts){
     var options = { className : 'DbInfoBlock', oid : opts.oid };
     var self = this;
     
-    options.name = "dbinfo";
+    options.name = "Db Info";
     options.inputs = [];
     options.output = { name : 'results', type : 'objects_list'};
     
@@ -411,7 +411,7 @@ sketchui.ListBlock = function(opts){
     var options = { className : 'ListBlock', oid: opts.oid };
     var self = this;
     
-    options.name = "listblock";
+    options.name = "List";
     options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true}];
     options.output = { name : 'results', type : 'objects_list'};
     
@@ -454,7 +454,7 @@ sketchui.MapBlock = function(opts){
     var options = { className : 'MapBlock', oid: opts.oid };
     var self = this;
     
-    options.name = "mapblock";
+    options.name = "Map";
     options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true}];
     options.output = { name : 'results', type : 'objects_list'};
     
@@ -566,7 +566,7 @@ sketchui.WordCloudBlock = function(opts){
     var options = { className : 'WordCloudBlock', oid:opts.oid };
     var self = this;
     
-    options.name = "wordcloudblock";
+    options.name = "D3 Word Cloud";
     options.inputs = [
         { name : 'in_collection', type : 'collection_name', connectable: true},
         //{ name : 'in_words', type : 'collection_name', connectable: true},
@@ -612,10 +612,11 @@ sketchui.WordCloudBlock = function(opts){
     
         self.dirty(true);
         $("#"+self.cloudOid).html('');
+         
         
         var fill = d3.scale.category20();
         
-        d3.layout.cloud().size([300, 300])
+        d3.layout.cloud().size([500, 300])
           .words(self.words().map(function(d) {
             return {text: d, size: 10 + Math.random() * 90};
           }))
@@ -629,11 +630,11 @@ sketchui.WordCloudBlock = function(opts){
 
     
       function draw(words) {
-        d3.select($("#"+self.cloudOid)[0])
+        d3.select($("#"+self.cloudOid)[0]).append("svg")
             .attr("width", 500)
-            .attr("height", 250)
+            .attr("height", 300)
           .append("g")
-            .attr("transform", "translate(150,150)")
+            .attr("transform", "translate(250,150)")
           .selectAll("text")
             .data(words)
           .enter().append("text")
