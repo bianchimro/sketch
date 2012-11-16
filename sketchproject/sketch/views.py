@@ -290,24 +290,34 @@ def operation(request):
     
     if request.POST:
     
-        source_name = request.POST['source_name']
-        source_arguments_json = request.POST.get('source_arguments', '{}')
-        source_arguments = json.loads(source_arguments_json, object_hook=bson.json_util.object_hook)
-        
-        map_operations_data_json = request.POST.get('map_operations_data', '[]');
-        map_operations_data =json.loads(map_operations_data_json, object_hook=bson.json_util.object_hook)
+        try:    
+            source_name = request.POST['source_name']
 
-        #map_operations_data = [{'name' : 'formatters.twitter_geojson'} ]
-        
-        m = sketch.operations.SketchOperation(source_name, source_arguments = source_arguments, map_operations_data=map_operations_data)
-        
-        try:
-            collection_name = m.perform()
-            out['collection_out'] = collection_name
+            source_arguments_json = request.POST.get('source_arguments', '{}')
+            source_arguments = json.loads(source_arguments_json, object_hook=bson.json_util.object_hook)
+            
+            map_operations_data_json = request.POST.get('map_operations_data', '[]');
+            map_operations_data =json.loads(map_operations_data_json, object_hook=bson.json_util.object_hook)
+            
+            reduce_operations_data_json = request.POST.get('reduce_operations_data', '[]');
+            reduce_operations_data =json.loads(reduce_operations_data_json, object_hook=bson.json_util.object_hook)
+    
+            #map_operations_data = [{'name' : 'formatters.twitter_geojson'} ]
+            
+            m = sketch.operations.SketchOperation(source_name, source_arguments = source_arguments, map_operations_data=map_operations_data,
+                            reduce_operations_data=reduce_operations_data)
+            
+            try:
+                collection_name = m.perform()
+                out['collection_out'] = collection_name
+            except Exception, e:
+                out['errors'] = str(e)
+                out['status'] = 0
+
         except Exception, e:
-            raise
             out['errors'] = str(e)
-            out['status'] = 0
+            out['status'] = 0            
+            
             
     
     return HttpResponse(json.dumps(out, default=bson.json_util.default))

@@ -2,6 +2,7 @@ from sketch import sourcesManager, resultsBackend
 from mongowrapper import mongo, default_mongo_db, results_mongo_db
 
 from formattersmanager import formattersManager
+from processingmanager import processingManager
 
 # FORMATTERS AND MAPPERS
 # FOR NOW WE IMAGINE A STRING PATTERN ... TO BE  CHANGED
@@ -9,27 +10,46 @@ from formattersmanager import formattersManager
 
 class MapOperationWrapper(object):
 
-    def __init__(self, operation):
+    def __init__(self, operation, options):
         self.operation = operation
+        self.options = options
 
-    def __call__(self, data, *args, **kwargs):
+    def __call__(self, data, *args):
         for d in data:
-            yield self.operation(d, *args, **kwargs)
+            yield self.operation(d, *args, **self.options)
 
+
+class ReduceOperationWrapper(object):
+
+    def __init__(self, operation, options):
+        self.operation = operation
+        self.options = options
+
+    def __call__(self, data, *args):
+        return self.operation(data, *args, **self.options)
 
 def MapOperationFactory(options):
 
     name = options['name']
     pieces = name.split('.')
     if pieces[0] == 'formatters':
-        wrapper = MapOperationWrapper(formattersManager.getFormatter(pieces[1]))
+        wrapper = MapOperationWrapper(formattersManager.getFormatter(pieces[1]), options.get('arguments', {}))
         return wrapper
     
     raise
 
 
 def ReduceOperationFactory(options):
-    pass
+
+    name = options['name']
+    print "xxx", name
+    pieces = name.split('.')
+        
+    if pieces[0] == 'processors':
+        wrapper = ReduceOperationWrapper(processingManager.getProcessor(pieces[1]), options.get('arguments', {}))
+        return wrapper
+    
+    raise
 
 
 
@@ -62,7 +82,7 @@ class SketchOperation(object):
         
         reduced_data = map_data
         for operation in self.reduce_operations:
-            reduced_data = operation(data)
+            reduced_data = operation(reduced_data)
             
         
         results_bucket = resultsBackend.write(reduced_data, hints=self.save_hints)

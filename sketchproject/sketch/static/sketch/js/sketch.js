@@ -233,7 +233,7 @@ sketchjs.Sketch.prototype.import = function(options, collection, parser, data, c
 
 
 /* operation function */
-sketchjs.Sketch.prototype.operation = function(sourceName, sourceOptions, mapOps, ajaxOptions){
+sketchjs.Sketch.prototype.operation = function(sourceName, sourceOptions, mapOps, reduceOps, ajaxOptions){
 
     //TODO: db is not used?
     var db = sourceOptions.database || this.database;
@@ -242,7 +242,9 @@ sketchjs.Sketch.prototype.operation = function(sourceName, sourceOptions, mapOps
     
     var data = { source_name : sourceName, 
                  source_arguments : JSON.stringify(sourceOptions||{}),  
-                 map_operations_data: JSON.stringify(mapOps||[])
+                 map_operations_data: JSON.stringify(mapOps||[]),
+                 reduce_operations_data: JSON.stringify(reduceOps||[]),
+                 
                 };
     var url = this.url + "/sketch/operation/";
 

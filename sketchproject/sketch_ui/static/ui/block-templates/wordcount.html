@@ -1,0 +1,36 @@
+ <div class="block listblock">
+     <div class="modal-header" data-bind="css: {run : !dirty(), notrun: dirty() }" >
+         <button type="button" class="close block-window-button" data-bind="click: remove">×</button>
+         <button type="button" class="close block-window-button" data-bind="click: maximize">O</button>
+         <button type="button" class="close block-window-button" data-bind="click: minimize">-</button>
+         <h4 data-bind="text: name"></h4>
+     </div>
+     <div class="modal-body" data-bind="visible: !minimized()">        
+
+         <form>
+             <div>
+         
+                 
+                <div>
+                     <label>Field</label>
+                     <input type="text" data-bind="value: inputObservables['field_name']"/>
+                </div>
+                <div>
+                     <label>Num words</label>
+                     <input type="text" data-bind="value: inputObservables['num_words']"/>
+                </div>
+                <div>
+                     <label>Min length</label>
+                     <input type="text" data-bind="value: inputObservables['min_length']"/>
+                </div>
+
+                 
+             </div>
+         </form>
+         
+     </div>
+     <div class="modal-footer">
+        <button class="btn" data-bind="click: run">Run</button>
+     </div>
+
+ </div>
