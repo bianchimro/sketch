@@ -284,6 +284,7 @@ def objects(request, collection, database=None):
   
     return HttpResponse(json.dumps(out, default=bson.json_util.default))
 
+
 def operation(request):
 
     out = createBaseResponseObject()

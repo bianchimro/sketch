@@ -794,21 +794,16 @@ sketchui.WordCountBlock = function(opts){
     self.inputObservables['in_collection'].subscribe(function(newValue){
 
         self.dirty(true);
-        
-        self.dirty(false)
+        //self.dirty(false)
         
     });
     
-    /*
-    self.currentIndex.subscribe(function(newValue){
-      
-    });
-    */
+  
     
     self.templateUrl = '/static/ui/block-templates/wordcount.html';
    
    
-   self.processor = function(inputArgs, context){
+    self.processor = function(inputArgs, context){
      
           var reduceOperationsData = [];
          
