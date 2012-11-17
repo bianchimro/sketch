@@ -16,7 +16,8 @@ class MapOperationWrapper(object):
 
     def __call__(self, data, *args):
         for d in data:
-            yield self.operation(d, *args, **self.options)
+            if d.keys():
+                yield self.operation(d, *args, **self.options)
 
 
 class ReduceOperationWrapper(object):

@@ -12,8 +12,10 @@ class ResultsBackend(object):
         if not collection_name:
             collection_name = mongo.get_results_collection_name(results_mongo_db, prefix=prefix)
 
+        collection = mongo.getCollection(results_mongo_db, collection_name)
         for r in data:
-            mongo._insert(results_mongo_db, collection_name, r)
+            if r.keys():
+                mongo._insert(results_mongo_db, collection_name, r)
         
         return collection_name
         

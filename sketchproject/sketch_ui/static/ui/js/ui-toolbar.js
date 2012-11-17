@@ -8,6 +8,12 @@ sketchui.ToolBar = function(register, canvasSelector){
      self.addQuery = function(){
          var qb = self.register.addBlock(new sketchui.QueryBlock(), canvasSelector);       
      };
+     
+     self.addTwitter = function(){
+         var tw = self.register.addBlock(new sketchui.TwitterSourceBlock(), canvasSelector);
+     };
+     
+     
      self.addList = function(){
          var li = self.register.addBlock(new sketchui.ListBlock(), canvasSelector);
      };
@@ -31,6 +37,10 @@ sketchui.ToolBar = function(register, canvasSelector){
      self.addWordCount = function(){
          var db = self.register.addBlock(new sketchui.WordCountBlock(), canvasSelector);
      };
+     
+     
+     
+     
      
      self.zoomOut = function(){
         //not working yet;

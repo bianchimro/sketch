@@ -839,6 +839,72 @@ sketchui.WordCountBlock = function(opts){
 
 
 
+sketchui.TwitterSourceBlock = function(opts){
+
+    var opts = opts || {};
+    var options = { className : 'TwitterSourceBlock', oid: opts.oid};
+    var self = this;
+    
+    options.name = "Twitter API Query";
+    options.inputs = [
+        { 'name' : 'q', type : 'text' },        
+        { 'name' : 'formatterEnabled', type : 'boolean', defaultValue : false },        
+        { 'name' : 'formatter', type : 'text' },        
+    ];
+    
+    options.output = { name : 'results', type : 'collection_name'};
+    
+    self = new sketchui.Block(options);
+    self.preview = ko.observable();
+    
+    self.templateUrl = '/static/ui/block-templates/twitterapi.html';
+    self.processor = function(inputArgs, context){
+    
+        var dropCollection = self.results() || null;
+        var formatter = self.inputObservables['formatterEnabled']() ? inputArgs.formatter : '';
+        self.dirty(true);
+        
+        var mapOperationsData = [];
+        if (formatter){
+          mapOperationsData.push({ 'name' : 'formatters.' + formatter});
+        };
+          
+        sketchui.sketch.operation('twitter', 
+                              { 'q' : inputArgs.q },
+                              mapOperationsData,
+                              [],
+                              { success : function(response){
+                                     context.results(response.collection_out);
+                                     self.dirty(false);
+                                  }
+                                  
+                              });
+     
+           
+    };
+    
+    
+    self.inputObservables['formatter'].subscribe(function(newValue){
+        jsPlumb.repaint(self.oid);
+    });
+    
+    
+    
+    //init code
+    
+    //self.formatterEnabled = ko.observable(false);
+    
+    self.formatters = ko.observableArray();
+    sketchui.sketch.getFormattersInfo(function(response){
+        self.formatters(response.results);
+    
+    }, { async:false });
+    
+    
+    
+    return self;
+
+};
 
 
 

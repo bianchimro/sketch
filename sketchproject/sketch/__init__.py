@@ -5,6 +5,7 @@ from sources import *
 resultsBackend = ResultsBackend()
 
 sourcesManager = SourceManager()
-sourcesManager.registerSource('mongo', MongoCollectionSource)
 
+sourcesManager.registerSource('mongo', MongoCollectionSource)
+sourcesManager.registerSource('twitter', TwitterAPISource)
 
