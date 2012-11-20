@@ -149,7 +149,7 @@ sketchui.SketchApp = function(){
                      temporary : self.temporary()
             },
             success : function(data){
-                console.log("response", data);
+                
                 var res = data['results'][0];
                 
                 self.oid(res.oid);

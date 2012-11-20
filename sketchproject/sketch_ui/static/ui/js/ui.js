@@ -12,7 +12,7 @@ sketchui.notifyCollections = function(data){
             dataType : 'json',
             data : data,
             success : function(response){
-                console.log("notified:", response.results);
+                //console.log("notified:", response.results);
             }
         }
     );

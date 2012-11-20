@@ -12,10 +12,15 @@ class ResultsBackend(object):
         if not collection_name:
             collection_name = mongo.get_results_collection_name(results_mongo_db, prefix=prefix)
         collection = mongo.getCollection(results_mongo_db, collection_name)
+        counted = 0
         for r in data:
 
             if r.keys():
                 mongo._insert(results_mongo_db, collection_name, r)
+                counted += 1
+                
+        if not counted:
+            return None
         
         return collection_name
         

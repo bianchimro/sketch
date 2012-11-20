@@ -1,6 +1,33 @@
 var sketchui = sketchui || {};
 
 
+
+sketchui.validators = {
+
+    'notEmpty' : { validator : function(value){ return value != '' }, message : 'Cannot be empty'},
+    'json' : { validator : function(value){ try{ JSON.parse(value); return true } catch(err){return false} }, 
+               message : 'Must be a json'}
+    
+}
+
+/*
+    #TODO:brach : blocks_refactor
+    input types  
+    validators
+    errors
+    uniform "process" idea
+    inputs connections: fix layout if more than one connection is possible ...
+        
+    #TODO, MAYBE
+    connectors scopes
+    multiple outputs
+
+    
+*/
+
+
+
+
 sketchui.Block = function(options){
     
     
@@ -26,6 +53,12 @@ sketchui.Block = function(options){
     
     self.results = ko.observable();    
     self.errors = ko.observableArray([]);
+    self.inputErrors = ko.observableArray([]);
+    
+    self.allErrors = ko.computed(function(){
+        return self.errors().concat(self.inputErrors);
+    
+    });
     
     
     self.template = ko.observable("");
@@ -57,6 +90,7 @@ sketchui.Block = function(options){
     
     self.setClean = function(){
         self.errors([]);
+        self.inputErrors([]);
         self.dirty(false);
     };
     
@@ -70,12 +104,18 @@ sketchui.Block = function(options){
                     console.log(2);
               self.errors(response.errors);        
         } else {
-          self.results(response.collection_out);
+            if(response.collection_out){
+                self.results(response.collection_out);  
+            } else {
+                self.results(null);  
+            }
+          
           self.setClean();
         }
       };
       
-    self.readResponseRecords= function(response){
+      
+    self.readResponseRecords = function(response){
         if(response.errors instanceof String && response.errors.length){
               self.errors([response.errors]);
         } else if(response.errors instanceof Array && response.errors.length) {
@@ -125,9 +165,35 @@ sketchui.Block = function(options){
         function(){
         
             var out = {};
+            self.inputErrors([]);
             for(var i in self.inputObservables){
                 var obs = self.inputObservables[i];
-                out[i] = obs();
+                var value = obs();
+                
+                //#TODO: FIX HERE!
+                //validate input here
+                var checkRequired = true;
+                if(self.inputMeta[i].required){
+                    
+                }
+                
+                if(self.inputMeta[i].validators){
+                    var validators = self.inputMeta[i].validators;
+                    
+                    for(var j=0,n=validators.length; j<n;j++){
+                        var validator = validators[j];
+                        console.log("v", validator);
+                        var success = validator.validator(value);
+                        if(!success){
+                            self.inputErrors.push(i + ": " + validator.message);
+                            break;
+                        }
+                        
+                    }
+                }
+                
+                var meta = self.inputMeta[i];
+                out[i] = value;
             }
             return out;
         }
@@ -139,7 +205,10 @@ sketchui.Block = function(options){
         var inputArgs = self.inputsArgs();
         
         if(self.processor instanceof Function){
-            self.processor(inputArgs, self);
+           
+            if(!self.inputErrors().length){
+                self.processor(inputArgs, self);
+            }
             
         }
     
@@ -335,7 +404,7 @@ sketchui.QueryBlock = function(opts){
     options.name = "Mongo Query";
     options.inputs = [
         { 'name' : 'collection', type : 'collection_name', connectable: true },
-        { 'name' : 'querystring', type : 'textarea' },        
+        { 'name' : 'querystring', type : 'textarea', validators : [sketchui.validators.json] },        
         { 'name' : 'formatterEnabled', type : 'boolean', defaultValue : false },        
         { 'name' : 'formatter', type : 'text' },        
     ];
@@ -482,8 +551,11 @@ sketchui.ListBlock = function(opts){
     
     
     self.readRecords = function(collectionName){
-    
-        sketchui.sketch.objects({}, collectionName, {  }, self.readResponseRecords);
+        if(collectionName){
+            sketchui.sketch.objects({}, collectionName, {  }, self.readResponseRecords);
+        } else {
+            self.results([]);
+        }
     };
     
 
@@ -619,7 +691,7 @@ sketchui.WordCloudBlock = function(opts){
     options.inputs = [
         { name : 'in_collection', type : 'collection_name', connectable: true},
         //{ name : 'in_words', type : 'collection_name', connectable: true},
-        { name : 'text_field', type : 'text', connectable: false},
+        { name : 'text_field', type : 'text', connectable: false, required:true},
         { name : 'min_length', type : 'text', connectable: false, defaultValue : 3},
         
     
@@ -918,11 +990,6 @@ sketchui.TwitterSourceBlock = function(opts){
         jsPlumb.repaint(self.oid);
     });
     
-    
-    
-    //init code
-    
-    //self.formatterEnabled = ko.observable(false);
     
     self.formatters = ko.observableArray();
     sketchui.sketch.getFormattersInfo(function(response){
