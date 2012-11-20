@@ -32,6 +32,10 @@
                  
              </div>
          </form>
+         <div data-bind="foreach: errors">
+            <div class="error" data-bind="text: $data">
+            </div>
+         </div>
          
          <!--
          <button type="button" class="btn btn-danger" data-toggle="collapse" data-target="#demo">
