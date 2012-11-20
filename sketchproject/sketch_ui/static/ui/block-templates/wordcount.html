@@ -27,6 +27,10 @@
                  
              </div>
          </form>
+         <div data-bind="foreach: allErrors">
+                <div class="error" data-bind="text: $data">
+                </div>
+         </div>
          
      </div>
      <div class="modal-footer">

@@ -2,14 +2,70 @@ var sketchui = sketchui || {};
 
 
 
-sketchui.validators = {
+sketchui.isEmpty = function(value){
+    return(value === [] || value === "" || value === null || value === undefined);
 
+}
+
+sketchui.validators = {};
+
+sketchui.validators.integer = (function(){
+
+    var self={};
+    self.validate = function(value){
+        var intRegex = /^\d+$/;
+        if(!intRegex.test(value)){
+            throw {name:'ValidationError', message:'Could not convert ' + value + ' to integer'}
+        }
+    }
+    
+    return self;
+    
+})();
+
+ 
+
+sketchui.validators.json = (function(){
+
+    var self={};
+    self.validate = function(value){
+        try {   
+            JSON.parse(value); 
+            return true 
+        } catch(err){
+            throw {name:'ValidationError', message:'Could not convert ' + value + ' to json'}
+        }
+    }
+    
+    return self;
+    
+})();
+
+
+sketchui.validators.notEmpty = (function(){
+
+    var self={};
+    self.validate = function(value){
+        if(sketchui.isEmpty(value)){
+            throw {name:'ValidationError', message:'cannot be empty, is:' + value}
+        }
+        return true;
+    }
+    return self;
+    
+})();
+
+
+
+
+
+/*
     'notEmpty' : { validator : function(value){ return value != '' }, message : 'Cannot be empty'},
     'json' : { validator : function(value){ try{ JSON.parse(value); return true } catch(err){return false} }, 
                message : 'Must be a json'}
     
-}
 
+/
 /*
     #TODO:brach : blocks_refactor
     input types  
@@ -61,6 +117,7 @@ sketchui.Block = function(options){
     });
     
     
+    
     self.template = ko.observable("");
     self.minimized = ko.observable(options.minimized || false);
     
@@ -88,6 +145,11 @@ sketchui.Block = function(options){
     }
     
     
+    self.repaint = function(){
+        jsPlumb.repaint(self.oid);
+    };
+    
+     
     self.setClean = function(){
         self.errors([]);
         self.inputErrors([]);
@@ -98,7 +160,6 @@ sketchui.Block = function(options){
     self.readResponseCollection = function(response){
         
         if(response.errors !=null && response.errors.length){
-            console.log(1);
               self.errors([response.errors]);
         } else if(false && response.errors instanceof Array && response.errors.length) {
                     console.log(2);
@@ -144,6 +205,15 @@ sketchui.Block = function(options){
         self.generateInEndpoints();
         self.setDraggable();
         
+        self.errors.subscribe(function(newValue){
+            self.repaint();
+        });
+        self.inputErrors.subscribe(function(newValue){
+            self.repaint();
+        });
+        
+        
+        
         return self;
     
     };
@@ -170,22 +240,28 @@ sketchui.Block = function(options){
                 var obs = self.inputObservables[i];
                 var value = obs();
                 
-                //#TODO: FIX HERE!
                 //validate input here
-                var checkRequired = true;
+                var noValue = sketchui.isEmpty(value);
                 if(self.inputMeta[i].required){
-                    
+                    try{
+                        sketchui.validators.notEmpty.validate(value);
+                    } catch(err){ 
+                        self.inputErrors.push(i + ": " + err.message);
+                        break;
+                    }
                 }
-                
-                if(self.inputMeta[i].validators){
+                if(!noValue && self.inputMeta[i].validators){
                     var validators = self.inputMeta[i].validators;
                     
                     for(var j=0,n=validators.length; j<n;j++){
                         var validator = validators[j];
                         console.log("v", validator);
-                        var success = validator.validator(value);
-                        if(!success){
-                            self.inputErrors.push(i + ": " + validator.message);
+                        try{
+                            validator.validate(value);
+                        
+                        } catch(err){
+                        
+                            self.inputErrors.push(i + ": " + err.message);
                             break;
                         }
                         
@@ -207,6 +283,7 @@ sketchui.Block = function(options){
         if(self.processor instanceof Function){
            
             if(!self.inputErrors().length){
+                self.setClean();
                 self.processor(inputArgs, self);
             }
             
@@ -403,8 +480,8 @@ sketchui.QueryBlock = function(opts){
     
     options.name = "Mongo Query";
     options.inputs = [
-        { 'name' : 'collection', type : 'collection_name', connectable: true },
-        { 'name' : 'querystring', type : 'textarea', validators : [sketchui.validators.json] },        
+        { 'name' : 'collection', type : 'collection_name', connectable: true, required:true },
+        { 'name' : 'querystring', type : 'textarea',  validators : [sketchui.validators.json] },        
         { 'name' : 'formatterEnabled', type : 'boolean', defaultValue : false },        
         { 'name' : 'formatter', type : 'text' },        
     ];
@@ -882,10 +959,10 @@ sketchui.WordCountBlock = function(opts){
     
     
     options.name = "Word count";
-    options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true},
-        { name : 'field_name', type : 'text', connectable: false, defaultValue : 'text'},
-        { name : 'num_words', type : 'integer', connectable: false, defaultValue : 20},
-        { name : 'min_length', type : 'integer', connectable: false, defaultValue : 4}
+    options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true, required: true},
+        { name : 'field_name', type : 'text', connectable: false, defaultValue : 'text', required: true},
+        { name : 'num_words', type : 'integer', connectable: false, defaultValue : 20, required:true, validators:[sketchui.validators.integer]},
+        { name : 'min_length', type : 'integer', connectable: false, defaultValue : 4, required:true, validators:[sketchui.validators.integer]}
         
     ];
 
