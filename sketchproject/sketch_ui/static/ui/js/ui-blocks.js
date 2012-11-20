@@ -25,6 +25,7 @@ sketchui.Block = function(options){
     self.templateUrl = options.templateUrl;
     
     self.results = ko.observable();    
+    self.errors = ko.observableArray([]);
     
     
     self.template = ko.observable("");
@@ -53,6 +54,37 @@ sketchui.Block = function(options){
     
     }
     
+    
+    self.setClean = function(){
+        self.errors([]);
+        self.dirty(false);
+    };
+    
+
+    self.readResponseCollection = function(response){
+        
+        if(response.errors !=null && response.errors.length){
+            console.log(1);
+              self.errors([response.errors]);
+        } else if(false && response.errors instanceof Array && response.errors.length) {
+                    console.log(2);
+              self.errors(response.errors);        
+        } else {
+          self.results(response.collection_out);
+          self.setClean();
+        }
+      };
+      
+    self.readResponseRecords= function(response){
+        if(response.errors instanceof String && response.errors.length){
+              self.errors([response.errors]);
+        } else if(response.errors instanceof Array && response.errors.length) {
+              self.errors(response.errors);        
+        } else {
+          self.results(response.results);
+          self.setClean();
+        }
+      };
     
     
     self.renderInContainer = function(containerSelector){
@@ -323,7 +355,7 @@ sketchui.QueryBlock = function(opts){
         //just skipping the query if there is not query or formatter    
         if(!inputArgs.querystring && !formatter){
              context.results(inputArgs.collection);   
-            self.dirty(false);
+             self.setClean();
         } else {      
            
            // commented version with objects
@@ -343,10 +375,7 @@ sketchui.QueryBlock = function(opts){
                                 { 'collection_name' : inputArgs.collection, 'query_dict':inputArgs.querystring || {} },
                                 mapOperationsData,
                                 [],
-                                { success : function(response){
-                                       context.results(response.collection_out);
-                                       self.dirty(false);
-                                    }
+                                { success : context.readResponseCollection
                                     
                                 });
         }
@@ -454,10 +483,7 @@ sketchui.ListBlock = function(opts){
     
     self.readRecords = function(collectionName){
     
-        sketchui.sketch.objects({}, collectionName, {  }, function(response){
-               self.results(response.results);
-               self.dirty(false);
-           });
+        sketchui.sketch.objects({}, collectionName, {  }, self.readResponseRecords);
     };
     
 
@@ -564,6 +590,10 @@ sketchui.MapBlock = function(opts){
     
     
     self.results.subscribe(function(newValue){
+        console.log("wwW", newValue);
+        if(self.geojson_layer){
+            self.map.removeLayer(self.geojson_layer);
+        }
         self.addLayer(newValue);
     });
     
@@ -839,6 +869,72 @@ sketchui.WordCountBlock = function(opts){
 
 
 
+sketchui.TwitterSourceBlock = function(opts){
+
+    var opts = opts || {};
+    var options = { className : 'TwitterSourceBlock', oid: opts.oid};
+    var self = this;
+    
+    options.name = "Twitter API Query";
+    options.inputs = [
+        { 'name' : 'q', type : 'text' },        
+        { 'name' : 'formatterEnabled', type : 'boolean', defaultValue : false },        
+        { 'name' : 'formatter', type : 'text' },        
+    ];
+    
+    options.output = { name : 'results', type : 'collection_name'};
+    
+    self = new sketchui.Block(options);
+    self.preview = ko.observable();
+    
+    self.templateUrl = '/static/ui/block-templates/twitterapi.html';
+    self.processor = function(inputArgs, context){
+    
+        var dropCollection = self.results() || null;
+        var formatter = self.inputObservables['formatterEnabled']() ? inputArgs.formatter : '';
+        self.dirty(true);
+        
+        var mapOperationsData = [];
+        if (formatter){
+          mapOperationsData.push({ 'name' : 'formatters.' + formatter});
+        };
+          
+        sketchui.sketch.operation('twitter', 
+                              { 'q' : inputArgs.q },
+                              mapOperationsData,
+                              [],
+                              { success : function(response){
+                                     context.results(response.collection_out);
+                                     self.dirty(false);
+                                  }
+                                  
+                              });
+     
+           
+    };
+    
+    
+    self.inputObservables['formatter'].subscribe(function(newValue){
+        jsPlumb.repaint(self.oid);
+    });
+    
+    
+    
+    //init code
+    
+    //self.formatterEnabled = ko.observable(false);
+    
+    self.formatters = ko.observableArray();
+    sketchui.sketch.getFormattersInfo(function(response){
+        self.formatters(response.results);
+    
+    }, { async:false });
+    
+    
+    
+    return self;
+
+};
 
 
 

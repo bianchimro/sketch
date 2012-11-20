@@ -43,25 +43,44 @@ def foursquare_geojson(object, *args, **kwargs):
     return out
 
 
+#from geopy import geocoders  
+#g = geocoders.Google()
+
 def twitter_geojson(object, *args, **kwargs):
     """
     Returns geojson object from a Foursquare data record.
     Only the id attribute is passed in geometric feature property.
     """
     
+    try:
+      
+        geom = object['geo']
+       
+        properties = dict()
+        properties['id'] = object['id']
+        
+        
+        out =     { "type": "Feature",
+                         "geometry":  geom ,
+                         "properties" : properties
+                      }
+                
+        #TODO: CONSIDER GENERATORS EVERYWHERE IN FORMATTERS
+        print "ooo"
+        return out
     
-    geom = object['coordinates']
-
-    properties = dict()
-    properties['id'] = object['id']
-    
-    out =     { "type": "Feature",
-                     "geometry":  geom ,
-                     "properties" : properties
-                  }
+    except:
+        raise
+        try:
+            location = object['location']
+            #place, (lat, lng) = g.geocode(location)  
+            #out = {'location' : location, 'lat':lat, 'lng' : lng, 'place':place }
+            print "aaa"
+            return dict()
             
-    #TODO: CONSIDER GENERATORS EVERYWHERE IN FORMATTERS
-    yield out
+        except:
+            print "xxx"
+            return dict()
 
 
 

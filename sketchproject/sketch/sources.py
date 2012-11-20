@@ -66,5 +66,36 @@ class MongoCollectionSource(BaseSketchSource):
 
 
 
+from twitter import *
+twitter_search = Twitter(domain="search.twitter.com")
+
+class TwitterAPISource(BaseSketchSource):
+    
+    """
+        
+    """
+    
+    def records(self, options):
+    
+        #db_name = options.get('db_name', default_mongo_db)
+        #collection_name = options['collection_name']
+        #query_dict = options.get('query_dict', {})
+        offset = options.get('offset', 0)
+        limit = options.get('limit', 100)
+
+        q = options['q']
+        records = twitter_search.search(q=q, geocode="43.781157,12,100mi")
+        
+        counted = 0
+        has_more = False
+        collection_out = None
+        
+        for r in records['results']:
+            if counted < limit or limit is None:
+                yield r
+
+
+
+
 
 

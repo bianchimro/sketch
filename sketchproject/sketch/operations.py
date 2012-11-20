@@ -16,7 +16,10 @@ class MapOperationWrapper(object):
 
     def __call__(self, data, *args):
         for d in data:
-            yield self.operation(d, *args, **self.options)
+            try:
+                yield self.operation(d, *args, **self.options)
+            except:
+                yield dict()
 
 
 class ReduceOperationWrapper(object):
@@ -42,7 +45,6 @@ def MapOperationFactory(options):
 def ReduceOperationFactory(options):
 
     name = options['name']
-    print "xxx", name
     pieces = name.split('.')
         
     if pieces[0] == 'processors':
@@ -84,7 +86,6 @@ class SketchOperation(object):
         for operation in self.reduce_operations:
             reduced_data = operation(reduced_data)
             
-        
         results_bucket = resultsBackend.write(reduced_data, hints=self.save_hints)
         return results_bucket
         

@@ -11,14 +11,10 @@
          <form>
              <div>
          
-                 <div>
-                     <label>Collection</label>
-                     <select data-bind="options: availableCollections, value: inputObservables['collection']">
-                     </select>
-                </div>
+                  
                 <div>
                      <label>Query</label>
-                     <textarea data-bind="value: inputObservables['querystring']"></textarea>
+                     <textarea data-bind="value: inputObservables['q']"></textarea>
                 </div>
                 <div>
                     <label class="checkbox"><input type="checkbox" data-bind="checked: inputObservables['formatterEnabled']"/>Format records</label>
@@ -32,30 +28,10 @@
                  
              </div>
          </form>
-         <div data-bind="foreach: errors">
-            <div class="error" data-bind="text: $data">
-            </div>
-         </div>
-         
-         <!--
-         <button type="button" class="btn btn-danger" data-toggle="collapse" data-target="#demo">
-              simple collapsible
-        </button>
- 
-        <div class="demo" class="collapse in"> … </div>
-        -->
          
      </div>
      <div class="modal-footer">
-         <button class="btn" data-bind="attr: {disabled: dirty() == true && !preview()}, click: getPreview">Preview</button>
          <button class="btn" data-bind="click: run">Run</button>
-     </div>
-     <div data-bind="visible: preview" class="queryblock-preview">
-        <h4>Preview</h4>
-        <div data-bind="foreach: preview">
-            <div data-bind="text: $parent.fromjson($data)"></div>
-            <hr/>
-        </div>
      </div>
      
      
