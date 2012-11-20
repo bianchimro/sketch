@@ -53,9 +53,9 @@ def twitter_geojson(object, *args, **kwargs):
     """
     
     try:
-        geom = object['coordinates']
-        
-        
+      
+        geom = object['geo']
+       
         properties = dict()
         properties['id'] = object['id']
         
@@ -70,7 +70,7 @@ def twitter_geojson(object, *args, **kwargs):
         return out
     
     except:
-    
+        raise
         try:
             location = object['location']
             #place, (lat, lng) = g.geocode(location)  
