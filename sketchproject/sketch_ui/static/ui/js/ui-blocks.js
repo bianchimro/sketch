@@ -46,8 +46,8 @@ sketchui.validators.float = (function(){
 
     var self={};
     self.validate = function(value){
-        var valid = (!(isNaN(parseFloat(value)));
-        if(!valid){
+        var notValid = isNaN(parseFloat(value));
+        if(notValid){
             throw {name:'ValidationError', message:'Could not convert ' + value + ' to float'}
         }
     }

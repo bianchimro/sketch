@@ -202,20 +202,21 @@
      
      <script>
      
-        jsPlumb.ready(function(){
-    
-            jsPlumb.importDefaults({
-                ConnectorZIndex:5,
-                DragOptions : { cursor: 'pointer', zIndex:2000 },
-                ConnectionOverlays : [
-					[ "Arrow", { location:0.9 } ]
-				]
-                
-                
-            });
+        head.ready(function(){
+     
+            jsPlumb.ready(function(){
         
-            sketchui.app = new sketchui.SketchApp();
-            ko.applyBindings(sketchui.app);
+                jsPlumb.importDefaults({
+                    ConnectorZIndex:5,
+                    DragOptions : { cursor: 'pointer', zIndex:2000 },
+                    ConnectionOverlays : [
+                        [ "Arrow", { location:0.9 } ]
+                    ]
+                });
+            
+                sketchui.app = new sketchui.SketchApp();
+                ko.applyBindings(sketchui.app);
+            });
         });
      </script>
      
