@@ -1,11 +1,30 @@
 var sketchui = sketchui || {};
 
+ 
+/*
+    #TODO:brach : blocks_refactor
+    input types and compatibility
+    validators# almost ok
+    errors# almost ok
+    
+    uniform "process" idea
+    inputs connections: fix layout if more than one connection is possible ...
+        
+    #TODO, MAYBE
+    connectors scopes
+    multiple outputs
+
+    
+*/
 
 
 sketchui.isEmpty = function(value){
     return(value === [] || value === "" || value === null || value === undefined);
 
 }
+
+
+/* validators */
 
 sketchui.validators = {};
 
@@ -23,7 +42,20 @@ sketchui.validators.integer = (function(){
     
 })();
 
- 
+sketchui.validators.float = (function(){
+
+    var self={};
+    self.validate = function(value){
+        var valid = (!(isNaN(parseFloat(value)));
+        if(!valid){
+            throw {name:'ValidationError', message:'Could not convert ' + value + ' to float'}
+        }
+    }
+    
+    return self;
+    
+})();
+
 
 sketchui.validators.json = (function(){
 
@@ -55,34 +87,46 @@ sketchui.validators.notEmpty = (function(){
     
 })();
 
-
-
-
-
-/*
-    'notEmpty' : { validator : function(value){ return value != '' }, message : 'Cannot be empty'},
-    'json' : { validator : function(value){ try{ JSON.parse(value); return true } catch(err){return false} }, 
-               message : 'Must be a json'}
+/* Field types */
+sketchui.fieldtypes = {};
+sketchui.fieldtypes.base = function(typeName){
+    if(!typeName){
+        throw {name : 'TypeError', message: 'You must pass in a typeName'};
+    }
+    var self={};
+    self.typeName = typeName;
+    self.validator = null
+    self.fromValue = function(value){
+        return value;
+    }
+    return self;
     
+};
 
-/
-/*
-    #TODO:brach : blocks_refactor
-    input types  
-    validators
-    errors
-    uniform "process" idea
-    inputs connections: fix layout if more than one connection is possible ...
-        
-    #TODO, MAYBE
-    connectors scopes
-    multiple outputs
+sketchui.fieldtypes.integer = (function(){
 
+    var self = new sketchui.fieldtypes.base('integer');
+    self.validator = sketchui.validators.integer;
+    self.fromValue = function(value){
+        return parseInt(value);
+    }
+    return self;
     
-*/
+})();
+
+sketchui.fieldtypes.float = (function(){
+
+    var self = new sketchui.fieldtypes.base('float');
+    self.validator = sketchui.validators.float;
+    self.fromValue = function(value){
+        return parseFloat(value);
+    }
+    return self;
+    
+})();
 
 
-
+/* Blocks */
 
 sketchui.Block = function(options){
     
@@ -281,13 +325,18 @@ sketchui.Block = function(options){
         var inputArgs = self.inputsArgs();
         
         if(self.processor instanceof Function){
-           
             if(!self.inputErrors().length){
                 self.setClean();
                 self.processor(inputArgs, self);
             }
-            
-        }
+        };
+        
+        if(self.visualize instanceof Function){
+            if(!self.allErrors().length){
+                self.visualize(inputArgs, self);
+            }
+        };
+        
     
     };
     
@@ -304,15 +353,11 @@ sketchui.Block = function(options){
             }
         
         });
-    
-    
     };
-    
     
     self.getTemplate = function(){
         self._getTemplate();
         return self.template();
-    
     };
     
     
@@ -613,6 +658,11 @@ sketchui.ListBlock = function(opts){
     
     self.templateUrl = '/static/ui/block-templates/listblock.html';
     
+    
+    self.visualize = function(){
+    
+    
+    };
     
     self.inputObservables['in_collection'].subscribe(function(newValue){
         var inputType = self.inConnectionsMeta['in_collection']['field']['type']; 
