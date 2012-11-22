@@ -86,8 +86,9 @@ class SketchOperation(object):
         for operation in self.reduce_operations:
             reduced_data = operation(reduced_data)
             
-        results_bucket = resultsBackend.write(reduced_data, hints=self.save_hints)
-        return results_bucket
+        results = resultsBackend.write(reduced_data, hints=self.save_hints)
+        
+        return results
         
     
 

@@ -14,7 +14,6 @@ class ResultsBackend(object):
         collection = mongo.getCollection(results_mongo_db, collection_name)
         counted = 0
         for r in data:
-
             if r.keys():
                 mongo._insert(results_mongo_db, collection_name, r)
                 counted += 1
@@ -22,7 +21,7 @@ class ResultsBackend(object):
         if not counted:
             return None
         
-        return collection_name
+        return { 'collection_name' : collection_name, 'num_records': counted}
         
         
     def read(self, data, options):

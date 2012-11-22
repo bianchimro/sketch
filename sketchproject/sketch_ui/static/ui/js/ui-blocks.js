@@ -152,6 +152,8 @@ sketchui.Block = function(options){
     self.templateUrl = options.templateUrl;
     
     self.results = ko.observable();    
+    self.numResults = ko.observable(0);    
+    
     self.errors = ko.observableArray([]);
     self.inputErrors = ko.observableArray([]);
     
@@ -211,8 +213,10 @@ sketchui.Block = function(options){
         } else {
             if(response.collection_out){
                 self.results(response.collection_out);  
+                self.numResults(response.num_records);
             } else {
                 self.results(null);  
+                self.numResults(0);
             }
           
           self.setClean();
@@ -227,6 +231,7 @@ sketchui.Block = function(options){
               self.errors(response.errors);        
         } else {
           self.results(response.results);
+          self.numResults(response.num_records);
           self.setClean();
         }
       };
@@ -667,7 +672,7 @@ sketchui.ListBlock = function(opts){
     self.inputObservables['in_collection'].subscribe(function(newValue){
         var inputType = self.inConnectionsMeta['in_collection']['field']['type']; 
         if(inputType == 'collection_name'){
-            self.readRecords(newValue);
+            self.readRecords(newValue, {limit:null});
         }
         if(inputType == 'objects_list'){
             self.results(newValue);
@@ -677,9 +682,10 @@ sketchui.ListBlock = function(opts){
     });
     
     
-    self.readRecords = function(collectionName){
+    self.readRecords = function(collectionName, options){
+        options = options || {};
         if(collectionName){
-            sketchui.sketch.objects({}, collectionName, {  }, self.readResponseRecords);
+            sketchui.sketch.objects(options, collectionName, {  }, self.readResponseRecords);
         } else {
             self.results([]);
         }

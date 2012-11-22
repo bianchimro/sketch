@@ -8,7 +8,6 @@
      <div class="modal-body" data-bind="visible: !minimized()">        
 
              <div data-bind="foreach: results()">
-         
                  <div data-bind="text: $root.fromjson($data)">
                  </div>
                  <hr/>
@@ -17,7 +16,7 @@
          
      </div>
      <div class="modal-footer">
-        
+        <span class="label" data-bind="text: numResults"></span>
      </div>
 
  </div>
