@@ -1,4 +1,5 @@
 from mongowrapper import mongo, default_mongo_db, results_mongo_db
+from sketch.helpers import generate_oid
 
 # Results backend
 # TODO: abstract..
@@ -15,7 +16,12 @@ class ResultsBackend(object):
         counted = 0
         for r in data:
             if r.keys():
-                mongo._insert(results_mongo_db, collection_name, r)
+                oid =  mongo._insert(results_mongo_db, collection_name, r)
+                #todo: see if this is applicable, or set an option for it
+                if "__sketch_id__" not in r:
+                    spec = { "_id" : oid }
+                    r['__sketch_id__'] =  str(oid) 
+                    mongo._update(results_mongo_db, collection_name, spec, r)
                 counted += 1
                 
         if not counted:

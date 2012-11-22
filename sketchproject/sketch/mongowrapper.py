@@ -89,6 +89,11 @@ class MongoWrapper(object):
         collection = self.getCollection(db_name, collection_name)
         return collection.insert(document)    
     
+    def _update(self, db_name, collection_name, spec, upd):
+        collection = self.getCollection(db_name, collection_name)
+        return collection.update(spec, upd)    
+    
+    
     
     def insert(self, db_name, collection_name, request):
     
