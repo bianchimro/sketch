@@ -3,11 +3,8 @@ This module contains an instance of RecordFormatter,
 to be used to register formatting funcions
 """
 
-from recordformatter import RecordFormatter
+
 import operator
-
-
-formattersManager = RecordFormatter()
 
 #TODO: CONSIDER GENERATORS!
 
@@ -18,9 +15,9 @@ def dummyFormatter(record, *args, **kwargs):
     """
     
     return record
+    
 
-
-def foursquare_geojson(object, *args, **kwargs):
+def foursquare_geojson(record, *args, **kwargs):
     """
     Returns geojson object from a Foursquare data record.
     Only the id attribute is passed in geometric feature property.
@@ -46,7 +43,7 @@ def foursquare_geojson(object, *args, **kwargs):
 #from geopy import geocoders  
 #g = geocoders.Google()
 
-def twitter_geojson(object, *args, **kwargs):
+def twitter_geojson(record, *args, **kwargs):
     """
     Returns geojson object from a Foursquare data record.
     Only the id attribute is passed in geometric feature property.
@@ -83,11 +80,5 @@ def twitter_geojson(object, *args, **kwargs):
             return dict()
 
 
-
-
-#registering the formatting functions
-formattersManager.registerFormattingFunction(dummyFormatter)
-formattersManager.registerFormattingFunction(foursquare_geojson)
-formattersManager.registerFormattingFunction(twitter_geojson)
 
 #TODO: AUTODISCOVER FORMATTING FUNCTIONS

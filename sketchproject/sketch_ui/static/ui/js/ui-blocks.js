@@ -692,6 +692,7 @@ sketchui.MapBlock = function(opts){
             self.map.removeLayer(self.geojson_layer);
         }
         self.addLayer(newValue);
+        self.setClean();
     });
     
     

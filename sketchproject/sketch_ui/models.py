@@ -64,7 +64,6 @@ def dropObsoleteMongoResults():
                 out.append(coll)
                 mongo.dropCollection(default_mongo_db, coll)
                 
-    print "dropped collections:", out
     return out
     
     
