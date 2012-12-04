@@ -53,7 +53,12 @@ def twitter_geojson(record, *args, **kwargs):
     try:
       
         geom = record['geo']
-       
+        try:
+            a,b = geom['coordinates']
+            geom['coordinates'] = b,a
+        except:
+            print geom
+            pass
         #properties = dict()
         #properties['id'] = object['id']
         properties = record
