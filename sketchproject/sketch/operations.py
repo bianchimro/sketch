@@ -1,7 +1,6 @@
-from sketch import sourcesManager, resultsBackend
+from sketch import sourcesManager, resultsBackend, formattersManager
 from mongowrapper import mongo, default_mongo_db, results_mongo_db
 
-from formattersmanager import formattersManager
 from processingmanager import processingManager
 
 # FORMATTERS AND MAPPERS

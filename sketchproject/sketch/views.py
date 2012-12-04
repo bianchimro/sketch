@@ -15,13 +15,12 @@ import decorators
 from mongowrapper import mongo
 from helpers import createBaseResponseObject, createResponseObjectWithError
 from helpers import getQueryDict, getOffset, getLimit, getFormatter, getMapper, getWriteCollection, getProcessor, instanceDict
-from sketch import formattersManager
 import recordparser
 
 from models import SketchMapper, SketchCollection
 
 import sketch.operations
-
+from sketch import formattersManager
 
 
 #login view
@@ -169,7 +168,6 @@ def mappers(request):
 
 def formatters(request):
     
-    import formattersmanager
     formatters = formattersManager.getFormatters()
     
     out = createBaseResponseObject()

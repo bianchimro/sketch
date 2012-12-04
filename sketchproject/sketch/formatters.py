@@ -23,10 +23,11 @@ def foursquare_geojson(record, *args, **kwargs):
     Only the id attribute is passed in geometric feature property.
     """
     
-    loc = object['location']
+    loc = record['location']
 
-    properties = dict()
-    properties['id'] = object['id']
+    #properties = dict()
+    #properties['id'] = object['id']
+    properties = record
     
     out =   { "type": "FeatureCollection",
               "features": [
@@ -51,19 +52,17 @@ def twitter_geojson(record, *args, **kwargs):
     
     try:
       
-        geom = object['geo']
+        geom = record['geo']
        
-        properties = dict()
-        properties['id'] = object['id']
-        
+        #properties = dict()
+        #properties['id'] = object['id']
+        properties = record
         
         out =     { "type": "Feature",
                          "geometry":  geom ,
                          "properties" : properties
                       }
                 
-        #TODO: CONSIDER GENERATORS EVERYWHERE IN FORMATTERS
-        print "ooo"
         return out
     
     except:
