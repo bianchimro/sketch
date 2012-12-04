@@ -26,11 +26,13 @@ sketchui.Register = function(options){
             //todo: generalize
             if(sourceBlock.results()){
                 targetBlock.inputObservables[targetLabel](sourceBlock.results());
-                targetBlock.dirty(false);  
+                targetBlock.run();
+                //targetBlock.dirty(false);  
             }
             targetBlock.inConnections[targetLabel] = sourceBlock.results.subscribe(function(newValue){
                 targetBlock.inputObservables[targetLabel](newValue);     
-                targetBlock.dirty(false);   
+                targetBlock.run();
+                //targetBlock.true(false);   
             });
             
             

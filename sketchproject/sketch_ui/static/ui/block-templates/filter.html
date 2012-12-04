@@ -1,0 +1,39 @@
+ <div class="block queryblock" >
+     <div class="modal-header" data-bind="css: {run : !dirty(), notrun: dirty() }">
+
+         <button type="button" class="close block-window-button" data-bind="click: remove">×</button>
+         <button type="button" class="close block-window-button" data-bind="click: maximize">O</button>
+         <button type="button" class="close block-window-button" data-bind="click: minimize">-</button>
+         <h4 data-bind="text: name"></h4>
+        
+     </div>
+     <div class="modal-body" data-bind="visible: !minimized()">        
+         
+             <div data-bind="foreach: filters()">
+             
+               <form class="form form-inline">
+                    <label>Key</label>
+                    <input type="text" class="input input-small" data-bind="value: key, valueUpdate: 'afterKeyDown'"/>
+                    
+                    <label>Value</label>
+                    <input type="text" class="input input-small" data-bind="value: value, valueUpdate: 'afterKeyDown'"/>
+                    
+                </div>
+                <hr/>
+
+                 
+            </form>
+         
+         <button class="btn btn-primary" data-bind="click: addClause">Add filter</button>
+         
+     </div>
+     <div class="modal-footer">
+         <div data-bind="foreach: allErrors">
+            <div class="error" data-bind="text: $data">
+            </div>
+         </div>
+
+     </div>
+     
+     
+ </div>

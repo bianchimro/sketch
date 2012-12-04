@@ -1,14 +1,10 @@
-import uuid
 import datetime
+from sketch.helpers import generate_oid
 
 from django.db import models
 from django.contrib.auth.models import User
 
 from json_field import JSONField
-
-
-def generate_oid():
-    return str(uuid.uuid4()).replace('-', '')
 
 
 class InterfaceState(models.Model):
@@ -68,7 +64,6 @@ def dropObsoleteMongoResults():
                 out.append(coll)
                 mongo.dropCollection(default_mongo_db, coll)
                 
-    print "dropped collections:", out
     return out
     
     

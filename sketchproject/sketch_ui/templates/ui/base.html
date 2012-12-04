@@ -13,6 +13,7 @@
         </style>
         <title>{% block title %}{% endblock %}</title>
         <script src="/static/sketch/js/jquery.js"></script>
+        <script src="/static/sketch_ui/js/lib/head.min.js"></script>
         {% block extra_head %}{% endblock %}
         
     </head>
@@ -32,6 +33,10 @@
     
    
     {% bootstrap_js all %}
+    
+    <script>
+        //head.js("/static/sketch/js/jquery.js");
+    </script>
     
     {% block js_body %}{% endblock %}
         

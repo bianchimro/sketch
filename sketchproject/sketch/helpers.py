@@ -2,6 +2,11 @@ import json
 import settings
 import bson
 import bson.json_util
+import uuid
+
+def generate_oid():
+    return str(uuid.uuid4()).replace('-', '')
+
 
 def instanceDict(instance, key_format=None):
     "Returns a dictionary containing field names and values for the given instance"

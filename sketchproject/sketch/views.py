@@ -15,7 +15,7 @@ import decorators
 from mongowrapper import mongo
 from helpers import createBaseResponseObject, createResponseObjectWithError
 from helpers import getQueryDict, getOffset, getLimit, getFormatter, getMapper, getWriteCollection, getProcessor, instanceDict
-from formattersmanager import formattersManager
+from sketch import formattersManager
 import recordparser
 
 from models import SketchMapper, SketchCollection
@@ -170,7 +170,7 @@ def mappers(request):
 def formatters(request):
     
     import formattersmanager
-    formatters = formattersmanager.formattersManager.getFormatters()
+    formatters = formattersManager.getFormatters()
     
     out = createBaseResponseObject()
     try:
@@ -273,6 +273,7 @@ def objects(request, collection, database=None):
                                      formatter_callback=formatter_callback, write_collection=write_collection)
                                      
         out['results'] = query_result['records']
+        out['num_records'] = query_result['num_records']
         out['has_more'] = query_result['has_more']
         out['collection_out'] = query_result['collection_out']
     
@@ -302,23 +303,27 @@ def operation(request):
             
             reduce_operations_data_json = request.POST.get('reduce_operations_data', '[]');
             reduce_operations_data =json.loads(reduce_operations_data_json, object_hook=bson.json_util.object_hook)
-    
-            #map_operations_data = [{'name' : 'formatters.twitter_geojson'} ]
-            
+      
             m = sketch.operations.SketchOperation(source_name, source_arguments = source_arguments, map_operations_data=map_operations_data,
                             reduce_operations_data=reduce_operations_data)
             
             try:
-                collection_name = m.perform()
-                out['collection_out'] = collection_name
+                op_results = m.perform()
+                out['collection_out'] = op_results['collection_name']
+                out['num_records'] = op_results['num_records']
+                
             except Exception, e:
+                raise
                 out['errors'] = str(e)
                 out['status'] = 0
+                out['num_records'] = 0
 
         except Exception, e:
+            raise
             out['errors'] = str(e)
-            out['status'] = 0            
-            
+            out['status'] = 0         
+            out['num_records'] = 0
+            out['collection_name'] = None   
             
     
     return HttpResponse(json.dumps(out, default=bson.json_util.default))

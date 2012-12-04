@@ -76,7 +76,7 @@
                 <div id="blocks-toolbar" data-bind="with: toolbar">
                     <button class="btn btn-primary" data-bind="click: addQuery"><i class="icon-search"></i>&nbsp;Query</Button>
                     <button class="btn btn-primary" data-bind="click: addTwitter"><i class="icon-search"></i>&nbsp;Twitter API</Button>
-                    
+                    <button class="btn btn-primary" data-bind="click: addFilter"><i class="icon-search"></i>&nbsp;Filter</Button>
                     <button class="btn btn-primary" data-bind="click: addList"><i class="icon-list"></i>&nbsp;List</Button>
                     <button class="btn btn-primary" data-bind="click: addItemList"><i class="icon-eye-open"></i>&nbsp;Item view</Button>
                     <button class="btn btn-primary" data-bind="click: addMap"><i class="icon-map-marker"></i>&nbsp;Map</Button>
@@ -179,8 +179,6 @@
     <!--<script src="/static/sketch_ui/js/lib/jquery.zoomooz.min.js"></script>-->
     
     <script src="/static/ui/jsPlumb/jquery.jsPlumb-1.3.16-all-min.js"></script>    
-    
-    
     <script src="/static/sketch_ui/js/lib/json-tree-viewer/js/jquery.jsonview.js"></script>
     
      <script src="/static/sketch/js/sketch.js"></script>
@@ -197,25 +195,27 @@
      <script src="/static/ui/js/ui-register.js"></script>
      <script src="/static/ui/js/ui-toolbar.js"></script>
      <script src="/static/ui/js/ui-app.js"></script>
+     <script src="/static/ui/js/ui-fields.js"></script>
      <script src="/static/ui/js/ui-blocks.js"></script>
      
      
      <script>
      
-        jsPlumb.ready(function(){
-    
-            jsPlumb.importDefaults({
-                ConnectorZIndex:5,
-                DragOptions : { cursor: 'pointer', zIndex:2000 },
-                ConnectionOverlays : [
-					[ "Arrow", { location:0.9 } ]
-				]
-                
-                
-            });
+        head.ready(function(){
+     
+            jsPlumb.ready(function(){
         
-            sketchui.app = new sketchui.SketchApp();
-            ko.applyBindings(sketchui.app);
+                jsPlumb.importDefaults({
+                    ConnectorZIndex:5,
+                    DragOptions : { cursor: 'pointer', zIndex:2000 },
+                    ConnectionOverlays : [
+                        [ "Arrow", { location:0.9 } ]
+                    ]
+                });
+            
+                sketchui.app = new sketchui.SketchApp();
+                ko.applyBindings(sketchui.app);
+            });
         });
      </script>
      

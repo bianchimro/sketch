@@ -1,5 +1,24 @@
 var sketchui = sketchui || {};
 
+ 
+/*
+    #TODO:brach : blocks_refactor
+    input types and compatibility
+    validators# almost ok
+    errors# almost ok
+    
+    uniform "process" idea
+    inputs connections: fix layout if more than one connection is possible ...
+        
+    #TODO, MAYBE
+    connectors scopes
+    multiple outputs
+
+    
+*/
+
+
+/* Blocks */
 
 sketchui.Block = function(options){
     
@@ -24,8 +43,19 @@ sketchui.Block = function(options){
     self.processor = options.processor;
     self.templateUrl = options.templateUrl;
     
+    self.internalSubscriptions = [];
+
     self.results = ko.observable();    
+    self.numResults = ko.observable(0);    
+    
     self.errors = ko.observableArray([]);
+    self.inputErrors = ko.observableArray([]);
+    
+    self.allErrors = ko.computed(function(){
+        return self.errors().concat(self.inputErrors);
+    
+    });
+    
     
     
     self.template = ko.observable("");
@@ -55,8 +85,14 @@ sketchui.Block = function(options){
     }
     
     
+    self.repaint = function(){
+        jsPlumb.repaint(self.oid);
+    };
+    
+     
     self.setClean = function(){
         self.errors([]);
+        self.inputErrors([]);
         self.dirty(false);
     };
     
@@ -64,24 +100,32 @@ sketchui.Block = function(options){
     self.readResponseCollection = function(response){
         
         if(response.errors !=null && response.errors.length){
-            console.log(1);
               self.errors([response.errors]);
         } else if(false && response.errors instanceof Array && response.errors.length) {
                     console.log(2);
               self.errors(response.errors);        
         } else {
-          self.results(response.collection_out);
+            if(response.collection_out){
+                self.results(response.collection_out);  
+                self.numResults(response.num_records);
+            } else {
+                self.results(null);  
+                self.numResults(0);
+            }
+          
           self.setClean();
         }
       };
       
-    self.readResponseRecords= function(response){
+      
+    self.readResponseRecords = function(response){
         if(response.errors instanceof String && response.errors.length){
               self.errors([response.errors]);
         } else if(response.errors instanceof Array && response.errors.length) {
               self.errors(response.errors);        
         } else {
           self.results(response.results);
+          self.numResults(response.num_records);
           self.setClean();
         }
       };
@@ -104,6 +148,15 @@ sketchui.Block = function(options){
         self.generateInEndpoints();
         self.setDraggable();
         
+        self.errors.subscribe(function(newValue){
+            self.repaint();
+        });
+        self.inputErrors.subscribe(function(newValue){
+            self.repaint();
+        });
+        
+        
+        
         return self;
     
     };
@@ -125,9 +178,41 @@ sketchui.Block = function(options){
         function(){
         
             var out = {};
+            self.inputErrors([]);
             for(var i in self.inputObservables){
                 var obs = self.inputObservables[i];
-                out[i] = obs();
+                var value = obs();
+                
+                //validate input here
+                var noValue = sketchui.isEmpty(value);
+                if(self.inputMeta[i].required){
+                    try{
+                        sketchui.validators.notEmpty.validate(value);
+                    } catch(err){ 
+                        self.inputErrors.push(i + ": " + err.message);
+                        break;
+                    }
+                }
+                if(!noValue && self.inputMeta[i].validators){
+                    var validators = self.inputMeta[i].validators;
+                    
+                    for(var j=0,n=validators.length; j<n;j++){
+                        var validator = validators[j];
+                        console.log("v", validator);
+                        try{
+                            validator.validate(value);
+                        
+                        } catch(err){
+                        
+                            self.inputErrors.push(i + ": " + err.message);
+                            break;
+                        }
+                        
+                    }
+                }
+                
+                var meta = self.inputMeta[i];
+                out[i] = value;
             }
             return out;
         }
@@ -139,9 +224,18 @@ sketchui.Block = function(options){
         var inputArgs = self.inputsArgs();
         
         if(self.processor instanceof Function){
-            self.processor(inputArgs, self);
-            
-        }
+            if(!self.inputErrors().length){
+                self.setClean();
+                self.processor(inputArgs, self);
+            }
+        };
+        
+        if(self.visualize instanceof Function){
+            if(!self.allErrors().length){
+                self.visualize(inputArgs, self);
+            }
+        };
+        
     
     };
     
@@ -158,15 +252,11 @@ sketchui.Block = function(options){
             }
         
         });
-    
-    
     };
-    
     
     self.getTemplate = function(){
         self._getTemplate();
         return self.template();
-    
     };
     
     
@@ -195,6 +285,7 @@ sketchui.Block = function(options){
        };
        
        var output = self.output;
+       
        var opts = { anchor:"BottomCenter" };
        self.outEndpoints[output.name] = jsPlumb.addEndpoint(self.containerElement,  opts, sourceEndpoint);
        self.outEndpoints[output.name].setLabel({ location:[0.5, 0.5], label:output.name, cssClass:"endpointTargetLabel" });
@@ -223,7 +314,11 @@ sketchui.Block = function(options){
             if(!inp.connectable){
                 continue;
             }
-            var opts = { anchors:"AutoDefault",};
+            
+            var dynamicAnchors = [ [0.5, 0, 0, -1] ,  [0, 0, 0, -1] , [ 1, 1, 0, -1 ], [ 0, 0.3, -1, 0 ] ];
+			var numPoint = Object.keys(self.inEndpoints).length;   
+			   
+            var opts = { anchors:dynamicAnchors[numPoint]};
             self.inEndpoints[inp.name] = jsPlumb.addEndpoint(self.containerElement,  opts, targetEndpoint);
             self.inEndpoints[inp.name].setLabel({ label: inp.name, cssClass:"endpointSourceLabel" });
             
@@ -334,8 +429,8 @@ sketchui.QueryBlock = function(opts){
     
     options.name = "Mongo Query";
     options.inputs = [
-        { 'name' : 'collection', type : 'collection_name', connectable: true },
-        { 'name' : 'querystring', type : 'textarea' },        
+        { 'name' : 'collection', type : 'collection_name', connectable: true, required:true },
+        { 'name' : 'querystring', type : 'textarea', connectable:true,  validators : [sketchui.validators.json] },        
         { 'name' : 'formatterEnabled', type : 'boolean', defaultValue : false },        
         { 'name' : 'formatter', type : 'text' },        
     ];
@@ -468,10 +563,15 @@ sketchui.ListBlock = function(opts){
     self.templateUrl = '/static/ui/block-templates/listblock.html';
     
     
+    self.visualize = function(){
+    
+    
+    };
+    
     self.inputObservables['in_collection'].subscribe(function(newValue){
         var inputType = self.inConnectionsMeta['in_collection']['field']['type']; 
         if(inputType == 'collection_name'){
-            self.readRecords(newValue);
+            self.readRecords(newValue, {limit:null});
         }
         if(inputType == 'objects_list'){
             self.results(newValue);
@@ -481,9 +581,13 @@ sketchui.ListBlock = function(opts){
     });
     
     
-    self.readRecords = function(collectionName){
-    
-        sketchui.sketch.objects({}, collectionName, {  }, self.readResponseRecords);
+    self.readRecords = function(collectionName, options){
+        options = options || {};
+        if(collectionName){
+            sketchui.sketch.objects(options, collectionName, {  }, self.readResponseRecords);
+        } else {
+            self.results([]);
+        }
     };
     
 
@@ -595,6 +699,7 @@ sketchui.MapBlock = function(opts){
             self.map.removeLayer(self.geojson_layer);
         }
         self.addLayer(newValue);
+        self.setClean();
     });
     
     
@@ -619,7 +724,7 @@ sketchui.WordCloudBlock = function(opts){
     options.inputs = [
         { name : 'in_collection', type : 'collection_name', connectable: true},
         //{ name : 'in_words', type : 'collection_name', connectable: true},
-        { name : 'text_field', type : 'text', connectable: false},
+        { name : 'text_field', type : 'text', connectable: false, required:true},
         { name : 'min_length', type : 'text', connectable: false, defaultValue : 3},
         
     
@@ -774,6 +879,12 @@ sketchui.ItemListBlock = function(opts){
             self.currentIndex(0);
             self.currentItem(newValue[0]);
         }
+        if(inputType == 'object'){
+            self.currentIndex(0);
+            self.currentItem(newValue);
+        }
+        
+        
         self.dirty(false)
         
     });
@@ -810,10 +921,10 @@ sketchui.WordCountBlock = function(opts){
     
     
     options.name = "Word count";
-    options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true},
-        { name : 'field_name', type : 'text', connectable: false, defaultValue : 'text'},
-        { name : 'num_words', type : 'integer', connectable: false, defaultValue : 20},
-        { name : 'min_length', type : 'integer', connectable: false, defaultValue : 4}
+    options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true, required: true},
+        { name : 'field_name', type : 'text', connectable: false, defaultValue : 'text', required: true},
+        { name : 'num_words', type : 'integer', connectable: false, defaultValue : 20, required:true, validators:[sketchui.validators.integer]},
+        { name : 'min_length', type : 'integer', connectable: false, defaultValue : 4, required:true, validators:[sketchui.validators.integer]}
         
     ];
 
@@ -885,7 +996,6 @@ sketchui.TwitterSourceBlock = function(opts){
     options.output = { name : 'results', type : 'collection_name'};
     
     self = new sketchui.Block(options);
-    self.preview = ko.observable();
     
     self.templateUrl = '/static/ui/block-templates/twitterapi.html';
     self.processor = function(inputArgs, context){
@@ -919,11 +1029,6 @@ sketchui.TwitterSourceBlock = function(opts){
     });
     
     
-    
-    //init code
-    
-    //self.formatterEnabled = ko.observable(false);
-    
     self.formatters = ko.observableArray();
     sketchui.sketch.getFormattersInfo(function(response){
         self.formatters(response.results);
@@ -938,10 +1043,65 @@ sketchui.TwitterSourceBlock = function(opts){
 
 
 
+ 
 
+sketchui.FilterBlock = function(opts){
 
+    var opts = opts || {};
+    var options = { className : 'FilterBlock', oid: opts.oid};
+    var self = this;
+    
+    options.name = "Filter block";
+    options.inputs = [
+    ];
+    
+    options.output = { name : 'results', type : 'object'};
+    
+    
+    self = new sketchui.Block(options);
+    self.templateUrl = '/static/ui/block-templates/filter.html';
+    self.filters = ko.observableArray([]);
+    
+    self.processor = function(inputArgs, context){
+           
+    };
+    
+    self.createFilter = ko.computed(function(){
+        var obj = {};
+        var fi = self.filters();
+        for(var i=0;i<fi.length; i++){
+            var filter = fi[i]();
+            if(filter.key()){
+                //#TODO: detect value type
+                obj[filter.key()] = filter.value();
+            }
+        }
+        
+        return JSON.stringify(obj);
+        console.log(self.results());
+    });
+    
+    self.addClause = function(){
+        var x = {'key' : ko.observable(''), value :ko.observable('')};
+        var f = ko.observable(x);
+        self.filters.push(f);
+        f.subscribe(function(){
+            console.log("z");
+        });
+        
+        
+        self.repaint();
+    }
+    
+    self.createFilter.subscribe(function(newValue){
+        
+        self.results(newValue);
+    });
+    
+    
+    return self;
 
-
+};
 
 
 

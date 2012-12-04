@@ -5,6 +5,8 @@ sketchui.ToolBar = function(register, canvasSelector){
      var self=this;
      self.register = register;
      
+     //#TODO: please generalize ...
+     
      self.addQuery = function(){
          var qb = self.register.addBlock(new sketchui.QueryBlock(), canvasSelector);       
      };
@@ -38,7 +40,9 @@ sketchui.ToolBar = function(register, canvasSelector){
          var db = self.register.addBlock(new sketchui.WordCountBlock(), canvasSelector);
      };
      
-     
+     self.addFilter= function(){
+         var fi = self.register.addBlock(new sketchui.FilterBlock(), canvasSelector);
+     };
      
      
      
