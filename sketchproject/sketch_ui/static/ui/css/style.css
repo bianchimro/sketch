@@ -59,7 +59,7 @@ body{
     overflow: scroll;
 }
 
-
+.mapblock .modal-body{ min-height:750px;}
 
 .map{
     width:500px;

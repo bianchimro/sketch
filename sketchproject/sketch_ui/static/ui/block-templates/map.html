@@ -13,6 +13,39 @@
              
              </div>
              
+             <form>
+                 <div>
+                    <h3>Popup settings</h3>
+                     <label>Text field for popup</label>
+                     <input type="text" data-bind="value: inputObservables['popup_field']"/>
+                 </div>
+                 <hr/>
+                 <div>
+                    <h3>Marker settings</h3>
+                     <label class="radio">
+                        <input type="radio" value="simple" data-bind="checked: markerType"/>
+                         Simple marker
+                    </label>
+                    
+                    <div data-bind="visible: markerType()=='simple'">
+                       <label>Color</label>
+                       <input type="text" data-bind=""/>
+                    </div>
+                    
+                     
+                     <label class="radio">
+                        <input type="radio" value="icon" data-bind="checked: markerType"/>
+                         Use icon
+                    </label>
+                    
+                    <div data-bind="visible: markerType()=='icon'">
+                       <label>Icon url</label>
+                       <input type="text" data-bind="value: inputObservables['external_graphics']"/>
+                    </div>
+                 
+                 </div>
+                 <hr/>
+             </form>
              
              <!--
              <div data-bind="foreach: results()">
@@ -26,7 +59,7 @@
          
      </div>
      <div class="modal-footer">
-        
+        <button class="btn" data-bind="click: refresh">Refresh</button>
      </div>
 
  </div>

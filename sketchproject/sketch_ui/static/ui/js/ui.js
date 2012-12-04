@@ -18,3 +18,28 @@ sketchui.notifyCollections = function(data){
     );
 
 }
+
+
+sketchui.getField = function(target, fieldSelector){
+    
+    var getFieldPart = function(obj,keys){
+        
+        if(keys.length == 1){
+            console.log(1, obj[keys[0]]);
+            return obj[keys[0]];
+        }
+        
+        var subObj = obj[keys[0]];
+        if(subObj === undefined || subObj === null){
+            return null;
+        }
+        
+        keys.splice(0,1);
+        return getFieldPart(subObj, keys);
+    
+    }
+    
+    var keys = fieldSelector.split('.');
+    return getFieldPart(target, keys);
+
+}

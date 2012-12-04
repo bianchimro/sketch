@@ -604,12 +604,20 @@ sketchui.MapBlock = function(opts){
     var self = this;
     
     options.name = "Map";
-    options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true}];
+    options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true},
+                       {name : 'popup_field', type:'text', defaultValue:"text"},
+                       {name : 'external_graphics', type:'text', defaultValue:"https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRG46K2Ila1Gi3I7DbJ-MFrkExjTcCSNCZi1X6WnL2AT0VfHu0mvg"},
+
+        ];
     options.output = { name : 'results', type : 'objects_list'};
     
     self = new sketchui.Block(options);
     
     self.templateUrl = '/static/ui/block-templates/map.html';
+    self.geojson_layer = null;
+    
+    self.markerType = ko.observable('simple');
+    
     
     
     self.inputObservables['in_collection'].subscribe(function(newValue){
@@ -674,8 +682,6 @@ sketchui.MapBlock = function(opts){
     
     self.addLayer = function(results){
     
-        //delete self.geojson_layer;
-    
         self.geojson_layer = new OpenLayers.Layer.Vector("GeoJSON");
         var geojson_format = new OpenLayers.Format.GeoJSON({
             'internalProjection': self.map.baseLayer.projection,
@@ -689,8 +695,130 @@ sketchui.MapBlock = function(opts){
         
         self.map.addLayer(self.geojson_layer);
         self.map.zoomToExtent(self.geojson_layer.getDataExtent());
+        
+        self.setupPopups();
+        self.setupStyles();
     
     };
+    
+    
+    self.setupStyles = function(){
+    
+        var externalGraphics;
+        if (self.markerType() == 'icon'){
+           externalGraphics = self.inputObservables['external_graphics']();
+        }
+        else{ 
+            externalGraphics= null;
+        }
+    
+        var defStyle = {
+            externalGraphic: externalGraphics, 
+            graphicWidth: 32, 
+            graphicHeight: 37, 
+            graphicYOffset: -37, 
+            graphicOpacity: 1, 
+            cursor: "pointer",
+            
+            fillColor: 'red'
+            
+            };
+        
+        var sty = OpenLayers.Util.applyDefaults(defStyle, OpenLayers.Feature.Vector.style["default"]);
+        var sm = new OpenLayers.StyleMap({
+            'default': sty
+        });
+        
+        self.geojson_layer.styleMap = sm;
+        self.map.refresh();
+    
+    
+    };
+    
+    self.setupPopups = function(){
+    
+        var field=self.inputObservables['popup_field']();  
+        if(!field){
+            console.log("no field set");
+            return;
+        }
+      
+    
+        if(self.geojson_layer){
+            
+            controls = self.map.getControlsByClass("OpenLayers.Control.SelectFeature");
+            console.log("controls", controls);
+            for(var i=0,n=controls.length;i<n;i++){
+                controls[i].destroy();
+            }
+            
+            var selectControl = new OpenLayers.Control.SelectFeature(self.geojson_layer,
+            {
+                //onSelect: onPopupFeatureSelect,
+                //onUnselect: onPopupFeatureUnselect 
+            });
+          
+            var onPopupFeatureSelect = function(feature) {
+                var selectedFeature = feature;
+                console.log("ss", selectedFeature);
+                var txt = sketchui.getField(selectedFeature, "attributes."+field);
+                
+                console.log("rxt",txt);
+                
+                
+                popup = new OpenLayers.Popup.FramedCloud("chicken",
+                    feature.geometry.getBounds().getCenterLonLat(),
+                    null, txt, null, true);
+                
+                popup.panMapIfOutOfView = true;
+                popup.autoSize = true;
+                feature.popup = popup;
+                self.map.addPopup(popup);
+            }
+            var onPopupFeatureUnselect = function(feature) {
+                self.map.removePopup(feature.popup);
+                feature.popup.destroy();
+                feature.popup = null;
+            }
+            
+            selectControl.onSelect = onPopupFeatureSelect;
+            selectControl.onUnselect = onPopupFeatureUnselect;
+            
+            
+            self.map.addControl(selectControl);
+            selectControl.activate();
+            
+            
+        }
+    
+    
+    
+    
+    
+    
+    };
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    self.refresh = function(){
+        self.setupPopups();
+        self.setClean();
+    };
+    
     
     
     self.results.subscribe(function(newValue){
