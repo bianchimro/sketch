@@ -1,5 +1,5 @@
 from mongowrapper import mongo, default_mongo_db, results_mongo_db
-
+import json
 
 class SourceManager(object):
     """
@@ -47,20 +47,27 @@ class MongoCollectionSource(BaseSketchSource):
         db_name = options.get('db_name', default_mongo_db)
         collection_name = options['collection_name']
         query_dict = options.get('query_dict', {})
+        if type(query_dict) != type({}):
+            query_dict = json.loads(query_dict)
+        print "ee", query_dict, type(query_dict)
+        
         offset = options.get('offset', 0)
         limit = options.get('limit', 100)
         
         collection = mongo.getCollection(db_name, collection_name)
         cursor = collection.find(query_dict)
         
-        records = []
-        counted = 0
-        has_more = False
-        collection_out = None
-        
-        for r in cursor[offset:]:
-            if counted < limit or limit is None:
-                yield r
+        if not cursor:
+            yield {}
+        else:
+            records = []
+            counted = 0
+            has_more = False
+            collection_out = None
+            
+            for r in cursor[offset:]:
+                if counted < limit or limit is None:
+                    yield r
 
 
 

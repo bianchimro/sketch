@@ -25,7 +25,7 @@ class ResultsBackend(object):
                 counted += 1
                 
         if not counted:
-            return None
+            return { 'collection_name' : None, 'num_records': counted }
         
         return { 'collection_name' : collection_name, 'num_records': counted}
         

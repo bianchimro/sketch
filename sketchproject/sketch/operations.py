@@ -76,7 +76,7 @@ class SketchOperation(object):
 
     
     def perform(self):
-        
+         
         data = self.source.records(self.source_arguments)
         map_data = data
         for operation in self.map_operations:

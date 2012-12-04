@@ -43,6 +43,8 @@ sketchui.Block = function(options){
     self.processor = options.processor;
     self.templateUrl = options.templateUrl;
     
+    self.internalSubscriptions = [];
+
     self.results = ko.observable();    
     self.numResults = ko.observable(0);    
     
@@ -283,6 +285,7 @@ sketchui.Block = function(options){
        };
        
        var output = self.output;
+       
        var opts = { anchor:"BottomCenter" };
        self.outEndpoints[output.name] = jsPlumb.addEndpoint(self.containerElement,  opts, sourceEndpoint);
        self.outEndpoints[output.name].setLabel({ location:[0.5, 0.5], label:output.name, cssClass:"endpointTargetLabel" });
@@ -311,7 +314,11 @@ sketchui.Block = function(options){
             if(!inp.connectable){
                 continue;
             }
-            var opts = { anchors:"AutoDefault",};
+            
+            var dynamicAnchors = [ [0.5, 0, 0, -1] ,  [0, 0, 0, -1] , [ 1, 1, 0, -1 ], [ 0, 0.3, -1, 0 ] ];
+			var numPoint = Object.keys(self.inEndpoints).length;   
+			   
+            var opts = { anchors:dynamicAnchors[numPoint]};
             self.inEndpoints[inp.name] = jsPlumb.addEndpoint(self.containerElement,  opts, targetEndpoint);
             self.inEndpoints[inp.name].setLabel({ label: inp.name, cssClass:"endpointSourceLabel" });
             
@@ -423,7 +430,7 @@ sketchui.QueryBlock = function(opts){
     options.name = "Mongo Query";
     options.inputs = [
         { 'name' : 'collection', type : 'collection_name', connectable: true, required:true },
-        { 'name' : 'querystring', type : 'textarea',  validators : [sketchui.validators.json] },        
+        { 'name' : 'querystring', type : 'textarea', connectable:true,  validators : [sketchui.validators.json] },        
         { 'name' : 'formatterEnabled', type : 'boolean', defaultValue : false },        
         { 'name' : 'formatter', type : 'text' },        
     ];
@@ -872,6 +879,12 @@ sketchui.ItemListBlock = function(opts){
             self.currentIndex(0);
             self.currentItem(newValue[0]);
         }
+        if(inputType == 'object'){
+            self.currentIndex(0);
+            self.currentItem(newValue);
+        }
+        
+        
         self.dirty(false)
         
     });
@@ -983,7 +996,6 @@ sketchui.TwitterSourceBlock = function(opts){
     options.output = { name : 'results', type : 'collection_name'};
     
     self = new sketchui.Block(options);
-    self.preview = ko.observable();
     
     self.templateUrl = '/static/ui/block-templates/twitterapi.html';
     self.processor = function(inputArgs, context){
@@ -1031,10 +1043,65 @@ sketchui.TwitterSourceBlock = function(opts){
 
 
 
+ 
 
+sketchui.FilterBlock = function(opts){
 
+    var opts = opts || {};
+    var options = { className : 'FilterBlock', oid: opts.oid};
+    var self = this;
+    
+    options.name = "Filter block";
+    options.inputs = [
+    ];
+    
+    options.output = { name : 'results', type : 'object'};
+    
+    
+    self = new sketchui.Block(options);
+    self.templateUrl = '/static/ui/block-templates/filter.html';
+    self.filters = ko.observableArray([]);
+    
+    self.processor = function(inputArgs, context){
+           
+    };
+    
+    self.createFilter = ko.computed(function(){
+        var obj = {};
+        var fi = self.filters();
+        for(var i=0;i<fi.length; i++){
+            var filter = fi[i]();
+            if(filter.key()){
+                //#TODO: detect value type
+                obj[filter.key()] = filter.value();
+            }
+        }
+        
+        return JSON.stringify(obj);
+        console.log(self.results());
+    });
+    
+    self.addClause = function(){
+        var x = {'key' : ko.observable(''), value :ko.observable('')};
+        var f = ko.observable(x);
+        self.filters.push(f);
+        f.subscribe(function(){
+            console.log("z");
+        });
+        
+        
+        self.repaint();
+    }
+    
+    self.createFilter.subscribe(function(newValue){
+        
+        self.results(newValue);
+    });
+    
+    
+    return self;
 
-
+};
 
 
 

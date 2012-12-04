@@ -313,11 +313,13 @@ def operation(request):
                 out['num_records'] = op_results['num_records']
                 
             except Exception, e:
+                raise
                 out['errors'] = str(e)
                 out['status'] = 0
                 out['num_records'] = 0
 
         except Exception, e:
+            raise
             out['errors'] = str(e)
             out['status'] = 0         
             out['num_records'] = 0
