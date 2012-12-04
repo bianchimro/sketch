@@ -8,9 +8,10 @@
      <div class="modal-body" data-bind="visible: !minimized()">        
 
              
-             
+             <div class="mapcontainer" style="width:500px;height:400px";>
              <div data-bind="attr: { 'id': mapOid }" class="map">
              
+             </div>
              </div>
              
              <form>
@@ -28,9 +29,26 @@
                     </label>
                     
                     <div data-bind="visible: markerType()=='simple'">
-                       <label>Color</label>
-                       <input type="text" data-bind=""/>
+                       <label>fillColor</label>
+                       <input type="text" data-bind="value: fillColor"/>
+                       
+                       <label>fillOpacity</label>
+                       <input type="text" data-bind="value: fillOpacity"/>
+                       
+                       
+                        <label>strokeColor</label>
+                       <input type="text" data-bind="value: strokeColor"/>
+                       
+                       <label>strokeOpacity</label>
+                       <input type="text" data-bind="value: strokeOpacity"/>
+                       
+                        <label>pointRadius</label>
+                       <input type="text" data-bind="value: pointRadius"/>
+                       
+                       
+                       
                     </div>
+                     
                     
                      
                      <label class="radio">
@@ -46,6 +64,11 @@
                  </div>
                  <hr/>
              </form>
+             
+             <!-- 
+             <button data-bind="click: exportMap">export image</button>
+             <canvas id="exportedImage" class="smallmap"></canvas> <br />
+             -->
              
              <!--
              <div data-bind="foreach: results()">

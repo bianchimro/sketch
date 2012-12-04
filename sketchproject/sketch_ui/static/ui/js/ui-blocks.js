@@ -606,7 +606,7 @@ sketchui.MapBlock = function(opts){
     options.name = "Map";
     options.inputs = [{ name : 'in_collection', type : 'collection_name', connectable: true},
                        {name : 'popup_field', type:'text', defaultValue:"text"},
-                       {name : 'external_graphics', type:'text', defaultValue:"https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRG46K2Ila1Gi3I7DbJ-MFrkExjTcCSNCZi1X6WnL2AT0VfHu0mvg"},
+                       {name : 'external_graphics', type:'text', defaultValue:"http://aux.iconpedia.net/uploads/2484076891043904041.png"},
 
         ];
     options.output = { name : 'results', type : 'objects_list'};
@@ -617,22 +617,14 @@ sketchui.MapBlock = function(opts){
     self.geojson_layer = null;
     
     self.markerType = ko.observable('simple');
+    self.fillColor = ko.observable('red');
+    self.strokeColor = ko.observable('red');
+    self.pointRadius = ko.observable('5');
+    self.fillOpacity = ko.observable('.4');
+    self.strokeOpacity = ko.observable('1');
+   
     
-    
-    
-    self.inputObservables['in_collection'].subscribe(function(newValue){
-        var inputType = self.inConnectionsMeta['in_collection']['field']['type']; 
-        if(inputType == 'collection_name'){
-            self.readRecords(newValue);
-        }
-        if(inputType == 'objects_list'){
-            self.results(newValue);
-        }
         
-        
-    });
-    
-    
     self.readRecords = function(collectionName){
     
         sketchui.sketch.objects({}, collectionName, {  }, function(response){
@@ -645,44 +637,39 @@ sketchui.MapBlock = function(opts){
     self.postRender = function(){
 
             self.map = new OpenLayers.Map(self.mapOid);
-            var osm = new OpenLayers.Layer.OSM();
+            var osm = new OpenLayers.Layer.OSM({});
             self.map.addLayer(osm);
             
             
-            /*
-            var geojson_layer = new OpenLayers.Layer.Vector("GeoJSON", {
-                strategies: [new OpenLayers.Strategy.BBOX()],
-                protocol: new OpenLayers.Protocol.HTTP({
-                    //url : '/static/geogeneric/l1.geojson',
-                    url: "/geo/layer/1",
-                    format: new OpenLayers.Format.GeoJSON()
-                })
-            });
-            
-
-            map.addLayer(geojson_layer);        
-            map.setCenter(new OpenLayers.LonLat(11000, 45000),10);
-            */
-            self.map.zoomToMaxExtent();    
-            
-            /*
-            $(self.selector).resizable({
+            $(".mapcontainer", self.selector).resizable({
                 resize : function(e,u){ 
                     jsPlumb.repaint(self.oid);
-                    
+                    self.map.updateSize();
                 },
                 
                 alsoResize: $("#"+self.mapOid)
             
             });        
-            */
+            
     
     };
     
     
+    self.exportMap = function () {
+                var canvas = OpenLayers.Util.getElement("exportedImage");
+                exportMapControl.trigger(canvas);   
+                
+//                // set download url (toDataURL() requires the use of a proxy)
+//                OpenLayers.Util.getElement("downloadLink").href = canvas.toDataURL();
+            }
+    
+    
+    
     self.addLayer = function(results){
     
-        self.geojson_layer = new OpenLayers.Layer.Vector("GeoJSON");
+        self.geojson_layer = new OpenLayers.Layer.Vector("GeoJSON", {
+            
+        });
         var geojson_format = new OpenLayers.Format.GeoJSON({
             'internalProjection': self.map.baseLayer.projection,
             'externalProjection': new OpenLayers.Projection("EPSG:4326")
@@ -720,17 +707,24 @@ sketchui.MapBlock = function(opts){
             graphicOpacity: 1, 
             cursor: "pointer",
             
-            fillColor: 'red'
+            fillColor: self.fillColor(),
+            strokeColor:self.strokeColor(),
+            pointRadius : self.pointRadius(),
+            fillOpacity : self.fillOpacity(),
+            strokeOpacity : self.strokeOpacity()
             
             };
         
         var sty = OpenLayers.Util.applyDefaults(defStyle, OpenLayers.Feature.Vector.style["default"]);
+        
         var sm = new OpenLayers.StyleMap({
             'default': sty
         });
         
         self.geojson_layer.styleMap = sm;
-        self.map.refresh();
+        self.geojson_layer.redraw();
+        self.map.removeLayer(self.geojson_layer);
+        self.map.addLayer(self.geojson_layer);
     
     
     };
@@ -747,7 +741,6 @@ sketchui.MapBlock = function(opts){
         if(self.geojson_layer){
             
             controls = self.map.getControlsByClass("OpenLayers.Control.SelectFeature");
-            console.log("controls", controls);
             for(var i=0,n=controls.length;i<n;i++){
                 controls[i].destroy();
             }
@@ -760,11 +753,7 @@ sketchui.MapBlock = function(opts){
           
             var onPopupFeatureSelect = function(feature) {
                 var selectedFeature = feature;
-                console.log("ss", selectedFeature);
                 var txt = sketchui.getField(selectedFeature, "attributes."+field);
-                
-                console.log("rxt",txt);
-                
                 
                 popup = new OpenLayers.Popup.FramedCloud("chicken",
                     feature.geometry.getBounds().getCenterLonLat(),
@@ -791,25 +780,7 @@ sketchui.MapBlock = function(opts){
             
         }
     
-    
-    
-    
-    
-    
     };
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     
@@ -817,9 +788,22 @@ sketchui.MapBlock = function(opts){
     self.refresh = function(){
         self.setupPopups();
         self.setClean();
+        self.setupStyles();
     };
     
     
+    
+    self.inputObservables['in_collection'].subscribe(function(newValue){
+        var inputType = self.inConnectionsMeta['in_collection']['field']['type']; 
+        if(inputType == 'collection_name'){
+            self.readRecords(newValue);
+        }
+        if(inputType == 'objects_list'){
+            self.results(newValue);
+        }    
+    });
+    
+
     
     self.results.subscribe(function(newValue){
         console.log("wwW", newValue);
