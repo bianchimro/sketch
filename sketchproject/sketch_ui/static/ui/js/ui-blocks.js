@@ -131,9 +131,17 @@ sketchui.Block = function(options){
       };
     
     
-    self.renderInContainer = function(containerSelector){
+    self.renderInContainer = function(containerSelector, stageMode){
         
-        var template = self.getTemplate();
+        var inStage = (stageMode===true);
+        var templateUrl = self.templateUrl;
+        if(inStage){
+            templateUrl = self.stageTemplateUrl;
+        }
+        
+        
+        var template = self.getTemplate(templateUrl);
+        
         var jTemplate = $(template);
         jTemplate.attr("id", self.oid);
         
@@ -240,10 +248,11 @@ sketchui.Block = function(options){
     };
     
     
-    self._getTemplate = function(){
+    self._getTemplate = function(templateUrl){
+        var tmplUrl = templateUrl || self.templateUrl;
         //todo: cache
         $.ajax({
-            url : self.templateUrl,
+            url : tmplUrl,
             type : 'GET',
             async : false,
             cache : false,
@@ -614,6 +623,8 @@ sketchui.MapBlock = function(opts){
     self = new sketchui.Block(options);
     
     self.templateUrl = '/static/ui/block-templates/map.html';
+    self.stageTemplateUrl = '/static/ui/block-templates/map.html';
+    
     self.geojson_layer = null;
     
     self.markerType = ko.observable('simple');
@@ -639,7 +650,7 @@ sketchui.MapBlock = function(opts){
             self.map = new OpenLayers.Map(self.mapOid);
             var osm = new OpenLayers.Layer.OSM({});
             self.map.addLayer(osm);
-            
+            self.map.zoomToMaxExtent();
             
             $(".mapcontainer", self.selector).resizable({
                 resize : function(e,u){ 
@@ -649,8 +660,10 @@ sketchui.MapBlock = function(opts){
                 
                 alsoResize: $("#"+self.mapOid)
             
-            });        
+            });
             
+            $(".nav-tabs").tab();        
+            $('a:last', self.selector).tab('show');
     
     };
     
@@ -808,7 +821,11 @@ sketchui.MapBlock = function(opts){
     self.results.subscribe(function(newValue){
         console.log("wwW", newValue);
         if(self.geojson_layer){
-            self.map.removeLayer(self.geojson_layer);
+            try{
+                self.map.removeLayer(self.geojson_layer);
+            } catch(err){
+                console.error(err);
+            }
         }
         self.addLayer(newValue);
         self.setClean();
@@ -817,7 +834,10 @@ sketchui.MapBlock = function(opts){
     
     self.map = null;
     self.mapOid = "map"+self.oid;
-    
+    self.popupSettingsId = "popup-settings" + self.oid;
+    self.popupSettingsSelector = "#"+self.popupSettingsId;
+    self.markerSettingsId = "marker-settings" + self.oid;
+    self.markerSettingsSelector= "#"+self.markerSettingsId;
     
 
     return self;

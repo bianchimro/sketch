@@ -27,6 +27,13 @@ def ui(request):
     c = RequestContext(request)
     return render_to_response("ui/index.html", {}, context_instance = c)
 
+def ui_stage(request, state_id):
+    state = InterfaceState.objects.get(pk=state_id)
+    c = RequestContext(request)
+    return render_to_response("ui/stage.html", { 'state': json.dumps(instanceDict(state), cls=DjangoJSONEncoder) }, context_instance = c)
+
+
+
 @login_required(login_url="/login/")
 def logout_view(request):
     logout(request)

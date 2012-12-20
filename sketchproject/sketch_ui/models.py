@@ -37,8 +37,7 @@ class CollectionReference(models.Model):
     interface_state = models.ForeignKey(InterfaceState)
     collection_name = models.CharField(max_length="300")
     last_alive = models.DateField(auto_now=True)
-    
-    
+
 
 #todo: move to a Manager
 """

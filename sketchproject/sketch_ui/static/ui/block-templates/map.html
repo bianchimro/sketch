@@ -9,20 +9,22 @@
 
              
              <div class="mapcontainer" style="width:500px;height:400px";>
-             <div data-bind="attr: { 'id': mapOid }" class="map">
-             
+                 <div data-bind="attr: { 'id': mapOid }" class="map">
+                 </div>
              </div>
-             </div>
              
-             <form>
-                 <div>
-                    <h3>Popup settings</h3>
+             
+            
+                
+           
+                <div data-bind="attr: { 'id': popupSettingsId }">
+                     <h4>Popup settings</h4>
                      <label>Text field for popup</label>
                      <input type="text" data-bind="value: inputObservables['popup_field']"/>
-                 </div>
-                 <hr/>
-                 <div>
-                    <h3>Marker settings</h3>
+                </div>
+                
+                <div data-bind="attr: { 'id': markerSettingsId }">
+                     <h4>Marker settings</h4>
                      <label class="radio">
                         <input type="radio" value="simple" data-bind="checked: markerType"/>
                          Simple marker
@@ -43,13 +45,9 @@
                        <input type="text" data-bind="value: strokeOpacity"/>
                        
                         <label>pointRadius</label>
-                       <input type="text" data-bind="value: pointRadius"/>
-                       
-                       
-                       
+                       <input type="text" data-bind="value: pointRadius"/>  
                     </div>
-                     
-                    
+                      
                      
                      <label class="radio">
                         <input type="radio" value="icon" data-bind="checked: markerType"/>
@@ -60,10 +58,12 @@
                        <label>Icon url</label>
                        <input type="text" data-bind="value: inputObservables['external_graphics']"/>
                     </div>
-                 
-                 </div>
-                 <hr/>
-             </form>
+                
+                </div>
+
+          
+            
+             
              
              <!-- 
              <button data-bind="click: exportMap">export image</button>

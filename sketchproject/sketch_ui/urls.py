@@ -8,6 +8,7 @@ urlpatterns = patterns('sketch_ui.views',
     # url(r'^sketchproject/', include('sketchproject.foo.urls')),
     url(r'index/$', 'index', name="sketch_ui_index"),
     url(r'ui/$', 'ui', name="ui"),
+    url(r'ui/stage/(?P<state_id>[\w]+)/$', 'ui_stage', name="ui_stage"),
     url(r'ui/state/$', 'ui_state', name="ui_state"),
     url(r'ui/collections_references/$', 'ui_collections_references', name="collections_references"),
     

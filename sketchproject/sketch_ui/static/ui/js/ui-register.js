@@ -52,9 +52,10 @@ sketchui.Register = function(options){
     
     
     
-    self.addBlock = function(blo, containerSelector){
+    self.addBlock = function(blo, containerSelector, stageMode){
+        var inStage = (stageMode === true);
         containerSelector = containerSelector || self.containerSelector;
-        blo = blo.renderInContainer(containerSelector);
+        blo = blo.renderInContainer(containerSelector, inStage);
         self.blocks[blo.oid] = blo;
         blo.register = self;
         return blo;
@@ -93,13 +94,15 @@ sketchui.Register = function(options){
     };
     
     
-    self.deserialize = function(serializedState){
+    self.deserialize = function(serializedState, options){
         
+        var options = options || {};
+        var inStage = (options.stage == true);
         
         // Placing all blocks on canvas
         for(x in serializedState.blocks){
             var data = serializedState.blocks[x];
-            self.deserializeBlock(data);
+            self.deserializeBlock(data, options);
         
         }
         
@@ -113,15 +116,17 @@ sketchui.Register = function(options){
                 var m = meta[in_field];
                 var source = m.oid;
                 var sourceBlock = self.blocks[m.oid];
-                var sourceEndpoint = sourceBlock.outEndpoints[m.field.name];
-                var targetEndpoint = targetBlock.inEndpoints[in_field];
-               
-                jsPlumb.connect({
-                        source : sourceEndpoint,
-                        target : targetEndpoint,
-                    }
-                    
-                );
+                if(sourceBlock){
+                    var sourceEndpoint = sourceBlock.outEndpoints[m.field.name];
+                    var targetEndpoint = targetBlock.inEndpoints[in_field];
+                   
+                    jsPlumb.connect({
+                            source : sourceEndpoint,
+                            target : targetEndpoint,
+                        }
+                        
+                    );
+                }
             }
         }
         
@@ -136,6 +141,7 @@ sketchui.Register = function(options){
                 var value = inputObservables[i];
                 console.log("value", i, value);
                 targetBlock.inputObservables[i](value);
+                
             }
             targetBlock.dirty(data.obj.dirty);
             jsPlumb.repaint(data.obj.oid);
@@ -146,14 +152,16 @@ sketchui.Register = function(options){
     
     };
     
-    self.deserializeBlock = function(data){
-         
+    self.deserializeBlock = function(data, options){
+        var options = options || {};
+        var inStage = (options.stage === true);
+        
         var obj = data.obj;
         var constructor = sketchui[obj.className];
         var block = new constructor({oid: obj.oid});
         
         block.minimized(data.view.minimized);
-        self.addBlock(block, self.containerSelector);
+        self.addBlock(block, self.containerSelector, inStage);
         $(block.selector).offset(data.view.offset);
         
     

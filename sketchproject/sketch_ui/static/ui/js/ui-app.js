@@ -76,6 +76,17 @@ sketchui.SketchApp = function(){
     
     };
     
+    self.setStageState = function(state){
+
+        self.register.resetBlocks();
+        self.register.deserialize(state, {stage:true});
+        //a good idea here would be destroying and re-instantiating the register;
+        
+    
+    };
+    
+    
+    
     //save and load dialog show and hide
     self.saveDialog = function(){
         $('#save-dialog').modal('show');
